@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
-import { X, Bell, Moon, Globe, Shield } from 'lucide-react'
+import { X, Bell, Moon, Globe, Shield, Mail } from 'lucide-react'
 import { C } from './BuyerTypes'
 import { toast } from 'sonner'
 
@@ -243,6 +243,40 @@ export function BuyerSettingsModal({
           >
             🌾 Apply to Become a Farmer
           </Link>
+
+          {/* Need Help? */}
+          <div
+            className="rounded-2xl p-4 flex items-center justify-between gap-4"
+            style={{
+              background: 'rgba(74,222,128,0.05)',
+              border: '1px solid rgba(74,222,128,0.12)',
+            }}
+          >
+            <div className="flex-1 min-w-0">
+              <div
+                className="text-[10px] font-semibold uppercase tracking-wider mb-1"
+                style={{ color: C.muted }}
+              >
+                Need Help?
+              </div>
+              <a
+                href="mailto:farmconnect.helpdesk@gmail.com"
+                className="text-xs font-bold truncate block hover:underline"
+                style={{ color: C.green }}
+              >
+                farmconnect.helpdesk@gmail.com
+              </a>
+            </div>
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              style={{
+                background: 'rgba(74,222,128,0.1)',
+                color: C.green,
+              }}
+            >
+              <Mail className="w-5 h-5" />
+            </div>
+          </div>
 
           <button
             onClick={() => {

@@ -40,16 +40,24 @@ function SignUpPage() {
           </button>
           <button
             type="button"
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 cursor-not-allowed relative group/phone ${
-              isDark ? 'text-[#3a4a3a]' : 'text-[#4a5a4a]/40'
+            disabled
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 relative group/phone overflow-hidden ${
+              isDark ? 'text-[#3a4a3a] bg-white/[0.01]' : 'text-[#4a5a4a]/40 bg-[#050a05]/5'
             }`}
             style={{ fontFamily: "'Syne', sans-serif" }}
           >
-            <Phone className="w-4 h-4" />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.05] to-transparent -translate-x-full group-hover/phone:translate-x-full transition-transform duration-1000" />
+            <Phone className="w-4 h-4 opacity-40" />
             Phone
-            <span className="absolute -top-2 -right-2 bg-[#d4a017] text-[#050a05] text-[8px] px-2 py-0.5 rounded-full font-black scale-0 group-hover/phone:scale-100 transition-transform origin-bottom-left">
-              COMING SOON
-            </span>
+            <div className="absolute top-1.5 right-1.5 flex items-center gap-1.5">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#d4a017] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#d4a017]"></span>
+              </span>
+              <span className="text-[7px] font-black text-[#d4a017] tracking-tighter opacity-0 group-hover/phone:opacity-100 transition-opacity whitespace-nowrap">
+                COMING SOON
+              </span>
+            </div>
           </button>
         </div>
       </div>

@@ -433,7 +433,7 @@ export function FarmerSettingsModal({ user, onClose, onNameUpdated }: Props) {
                   ['Role', '🌾 Farmer'],
                   ['Status', 'Verified'],
                   ['Email', user.email],
-                  ['Support', 'harvesthub.help@gmail.com'],
+                  ['Support', 'farmconnect.helpdesk@gmail.com'],
                 ].map(([k, v]) => (
                   <div
                     key={k}
@@ -459,12 +459,12 @@ export function FarmerSettingsModal({ user, onClose, onNameUpdated }: Props) {
                   Need Help?
                 </div>
                 <a
-                  href="mailto:harvesthub.help@gmail.com"
+                  href="mailto:farmconnect.helpdesk@gmail.com"
                   className="text-xs font-semibold flex items-center gap-1.5 hover:underline"
                   style={{ color: C.green }}
                 >
                   <Mail className="w-3.5 h-3.5" />
-                  harvesthub.help@gmail.com
+                  farmconnect.helpdesk@gmail.com
                 </a>
               </div>
               <button

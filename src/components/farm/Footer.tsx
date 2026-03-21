@@ -36,7 +36,7 @@ const FOOTER_LINKS = {
 }
 
 const CONTACT = [
-  { Icon: Mail, label: 'Email', value: 'hello@harvesthub.in' },
+  { Icon: Mail, label: 'Email', value: 'farmconnect.helpdesk@gmail.com' },
   { Icon: Phone, label: 'Farmer Support', value: '+91 800-HARVEST-IN' },
   { Icon: MapPin, label: 'HQ', value: 'Hyderabad, Telangana · Nationwide' },
 ]
