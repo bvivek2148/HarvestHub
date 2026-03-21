@@ -58,15 +58,17 @@ function SignUpPage() {
         {mode === 'clerk' ? (
           <SignUp 
             routing="path" 
-            path="/sign-up/$" 
-            signInUrl="/sign-in/$"
+            path="/sign-up" 
+            signInUrl="/sign-in"
             forceRedirectUrl="/farmer"
             fallbackRedirectUrl="/farmer"
             appearance={{
               elements: {
                 rootBox: "w-full mx-auto",
                 card: "bg-transparent shadow-none p-0 border-none",
-                header: "hidden",
+                header: "flex flex-col items-center mb-8",
+                headerTitle: "hidden",
+                headerSubtitle: "hidden",
                 socialButtonsBlockButton: `${isDark ? 'bg-white/[0.03] border-white/10 hover:bg-white/[0.08] text-white' : 'bg-[#050a05]/5 border-[#050a05]/10 hover:bg-[#050a05]/10 text-[#050a05]'} transition-all rounded-2xl py-4 border-opacity-20`,
                 socialButtonsBlockButtonText: "font-black uppercase tracking-widest text-[10px]",
                 formButtonPrimary: `${isDark ? 'bg-white text-[#050a05] hover:bg-[#4ade80]' : 'bg-[#16a34a] text-white hover:bg-[#15803d]'} transition-all duration-500 border-none shadow-[0_0_40px_rgba(255,255,255,0.1)] rounded-2xl py-4 font-black uppercase tracking-[0.3em] text-xs`,

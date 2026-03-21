@@ -14,6 +14,9 @@ export interface Notification {
   createdAt: any
 }
 
+import { getAuth, onAuthStateChanged } from 'firebase/auth'
+import { app } from '@/lib/firebase'
+
 export function useNotifications() {
   const { currentUser } = useAuth()
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -22,39 +25,52 @@ export function useNotifications() {
   useEffect(() => {
     if (!currentUser?.id) return
 
-    const q = query(
-      collection(db, 'notifications'),
-      where('userId', '==', currentUser.id),
-      orderBy('createdAt', 'asc'), // Fetch in ASC order to handle "new" arrivals easily? No, keep DESC for list.
-      limit(20)
-    )
+    const auth = getAuth(app)
+    let unsubscribeSnapshot: (() => void) | undefined
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as Notification[]
-      
-      // Sort desc for the UI list
-      const sortedDocs = [...docs].sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis())
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      // If we already have a listener, kill it if the user changed
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot()
+        unsubscribeSnapshot = undefined
+      }
 
-      // Look for newly added docs
-      snapshot.docChanges().forEach((change) => {
+      if (!user) return
+
+      const q = query(
+        collection(db, 'notifications'),
+        where('userId', '==', currentUser.id),
+        orderBy('createdAt', 'asc'),
+        limit(20)
+      )
+
+      unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
+        const docs = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Notification[]
+        
+        const sortedDocs = [...docs].sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis())
+
+        snapshot.docChanges().forEach((change) => {
           if (change.type === 'added' && !snapshot.metadata.fromCache) {
-              const data = change.doc.data() as Notification
-              // Only toast if it's very recent (not initial load)
-              toast.info(data.title, {
-                  description: data.message,
-                  duration: 5000,
-              })
+            const data = change.doc.data() as Notification
+            toast.info(data.title, {
+              description: data.message,
+              duration: 5000,
+            })
           }
-      })
+        })
 
-      setNotifications(sortedDocs)
-      setUnreadCount(docs.filter(n => !n.read).length)
+        setNotifications(sortedDocs)
+        setUnreadCount(docs.filter(n => !n.read).length)
+      })
     })
 
-    return () => unsubscribe()
+    return () => {
+      unsubscribeAuth()
+      if (unsubscribeSnapshot) unsubscribeSnapshot()
+    }
   }, [currentUser?.id])
 
   const markAsRead = async (id: string) => {
