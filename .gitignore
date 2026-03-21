@@ -1,0 +1,40 @@
+# Project
+node_modules/
+dist/
+dist-ssr/
+build/
+.output/
+.vinxi/
+.nitro/
+.tanstack/
+.vercel/
+.netlify/
+
+# Environment / Sensitive
+.env
+.env.*
+!.env.example
+*.local
+*.local.*
+*.secret
+
+# AI & Tooling
+.gemini/
+.cursor/
+tmp/
+*.log
+.eslintcache
+.stylelintcache
+todos.json
+count.txt
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

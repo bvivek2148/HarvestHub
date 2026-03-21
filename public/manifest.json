@@ -1,0 +1,13 @@
+{
+  "name": "HarvestHub Marketplace",
+  "short_name": "HarvestHub",
+  "description": "Farm-fresh produce direct from local farmers. Browse, chat, buy securely.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f5f0",
+  "theme_color": "#14532d",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "any", "type": "image/x-icon" }
+  ]
+}

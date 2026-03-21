@@ -1,0 +1,350 @@
+@import 'tailwindcss';
+
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Custom breakpoints ─────────────────────────────────────────────── */
+@theme {
+  --breakpoint-xs: 480px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply m-0;
+  font-family:
+    'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+code {
+  font-family:
+    source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* ─── HarvestHub Design Tokens ────────────────────────────────────────── */
+:root {
+  /* Shadcn base (light) */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.21 0.006 285.885);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.871 0.006 286.286);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.21 0.006 285.885);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.871 0.006 286.286);
+
+  /* ═══════════════════════════════════════════════════════════════════
+     HarvestHub LIGHT mode — Natural & Trustworthy
+     Primary: Emerald Green (#16a34a) | Accent: Amber Gold (#d97706)
+     Base: Stone White (#fafaf9) | Text: Forest (#1c2e1c)
+  ═══════════════════════════════════════════════════════════════════ */
+
+  /* Page backgrounds */
+  --fd-bg:               #fafaf9;          /* stone-50 */
+  --fd-bg-2:             #f5f5f4;          /* stone-100 */
+  --fd-bg-3:             #e7e5e4;          /* stone-200 */
+
+  /* Surface / card */
+  --fd-surface:          rgba(255,255,255,0.95);
+  --fd-surface-2:        rgba(250,250,249,0.9);
+  --fd-glass:            rgba(255,255,255,0.85);
+  --fd-glass-border:     rgba(255,255,255,0.6);
+
+  /* Borders */
+  --fd-border:           rgba(16,163,74,0.15);
+  --fd-border-mid:       rgba(16,163,74,0.28);
+  --fd-border-strong:    rgba(16,163,74,0.45);
+
+  /* Typography */
+  --fd-text:             #1c2d1c;          /* deep forest */
+  --fd-text-2:           #374e37;          /* forest-700 */
+  --fd-text-3:           #4b5563;          /* slate-600 */
+  --fd-text-muted:       #78716c;          /* stone-500 */
+
+  /* Brand colours */
+  --fd-gold:             #d97706;          /* amber-600 */
+  --fd-gold-light:       #f59e0b;          /* amber-400 */
+  --fd-gold-bg:          #fef3c7;          /* amber-100 soft */
+  --fd-green:            #16a34a;          /* emerald-600 */
+  --fd-green-light:      #22c55e;          /* emerald-400 */
+  --fd-green-dark:       #14532d;          /* emerald-900 */
+  --fd-green-bg:         #dcfce7;          /* emerald-100 */
+
+  /* Nav */
+  --fd-nav-bg:           rgba(255,255,255,0.96);
+  --fd-nav-link:         #374e37;
+  --fd-nav-link-hover:   #1c2d1c;
+
+  /* Hero — dark cinematic overlay on photos */
+  --fd-hero-bg:          #14532d;          /* deep forest gradient base */
+  --fd-hero-text:        #ffffff;
+  --fd-hero-subtext:     rgba(253,253,252,0.85);
+  --fd-hero-muted:       rgba(253,253,252,0.6);
+  --fd-hero-stat-bg:     rgba(255,255,255,0.12);
+  --fd-hero-stat-border: rgba(255,255,255,0.25);
+  --fd-hero-overlay-1:   rgba(20,83,45,0.88);    /* deep forest */
+  --fd-hero-overlay-2:   rgba(20,83,45,0.45);
+  --fd-hero-overlay-3:   rgba(120,50,10,0.72);   /* amber-900 bottom */
+
+  /* Cards */
+  --fd-card-bg:          linear-gradient(160deg, rgba(255,255,255,0.98) 0%, rgba(250,250,249,0.95) 100%);
+  --fd-card-shadow:      0 8px 32px rgba(16,163,74,0.10),
+                         0 2px 8px rgba(0,0,0,0.04),
+                         0 0 0 1px rgba(16,163,74,0.08);
+
+  /* Inputs */
+  --fd-input-bg:         #ffffff;
+  --fd-input-border:     rgba(16,163,74,0.25);
+
+  /* Footer — stays dark for contrast */
+  --fd-footer-bg:        #14532d;
+
+  /* Modals */
+  --fd-modal-bg:         #ffffff;
+  --fd-modal-border:     rgba(16,163,74,0.2);
+
+  /* Tags / muted buttons */
+  --fd-tag-bg:           #fef3c7;
+  --fd-tag-color:        #92400e;
+  --fd-btn-muted-bg:     rgba(16,163,74,0.06);
+  --fd-btn-muted-border: rgba(16,163,74,0.2);
+  --fd-btn-muted-text:   #374e37;
+
+  /* Overlay */
+  --fd-overlay:          rgba(20,83,45,0.65);
+
+  /* Scrollbar */
+  --fd-scroll-thumb:     rgba(16,163,74,0.3);
+
+  /* Section */
+  --fd-section-bg:       #f0fdf4;          /* emerald-50 tint */
+}
+
+.dark {
+  /* Shadcn base (dark) */
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.141 0.005 285.823);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.141 0.005 285.823);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.21 0.006 285.885);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.274 0.006 286.033);
+  --input: oklch(0.274 0.006 286.033);
+  --ring: oklch(0.442 0.017 285.786);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.274 0.006 286.033);
+  --sidebar-ring: oklch(0.442 0.017 285.786);
+
+  /* ═══════════════════════════════════════════════════════════════════
+     HarvestHub DARK mode — Deep Forest Night
+  ═══════════════════════════════════════════════════════════════════ */
+  --fd-bg:               #060d06;
+  --fd-bg-2:             #0a160a;
+  --fd-bg-3:             #0d1a0d;
+  --fd-surface:          rgba(13,26,13,0.96);
+  --fd-surface-2:        rgba(17,31,17,0.95);
+  --fd-glass:            rgba(13,26,13,0.85);
+  --fd-glass-border:     rgba(42,74,42,0.5);
+  --fd-border:           rgba(42,74,42,0.5);
+  --fd-border-mid:       rgba(42,74,42,0.7);
+  --fd-border-strong:    rgba(42,74,42,0.9);
+  --fd-text:             #f5f0e8;
+  --fd-text-2:           #c5bfb0;
+  --fd-text-3:           #a09880;
+  --fd-text-muted:       #7a7060;
+  --fd-gold:             #d4a017;
+  --fd-gold-light:       #f0c340;
+  --fd-gold-bg:          rgba(212,160,23,0.08);
+  --fd-green:            #22c55e;
+  --fd-green-light:      #4ade80;
+  --fd-green-dark:       #16a34a;
+  --fd-green-bg:         rgba(34,197,94,0.08);
+  --fd-nav-bg:           rgba(13,26,13,0.96);
+  --fd-nav-link:         #c5bfb0;
+  --fd-nav-link-hover:   #f5f0e8;
+  --fd-hero-bg:          #060d06;
+  --fd-hero-text:        #f5f0e8;
+  --fd-hero-subtext:     rgba(245,240,232,0.8);
+  --fd-hero-muted:       #7a7060;
+  --fd-hero-stat-bg:     rgba(6,13,6,0.7);
+  --fd-hero-stat-border: rgba(42,74,42,0.4);
+  --fd-hero-overlay-1:   rgba(6,13,6,0.90);
+  --fd-hero-overlay-2:   rgba(6,13,6,0.52);
+  --fd-hero-overlay-3:   rgba(6,13,6,0.86);
+  --fd-card-bg:          linear-gradient(160deg, #111f11 0%, #0d1a0d 100%);
+  --fd-card-shadow:      0 20px 50px rgba(0,0,0,0.5);
+  --fd-input-bg:         #111f11;
+  --fd-input-border:     rgba(42,74,42,0.6);
+  --fd-footer-bg:        #080e08;
+  --fd-modal-bg:         #0a160a;
+  --fd-modal-border:     rgba(42,74,42,0.6);
+  --fd-tag-bg:           rgba(212,160,23,0.08);
+  --fd-tag-color:        #d4a017;
+  --fd-btn-muted-bg:     rgba(26,42,26,0.6);
+  --fd-btn-muted-border: rgba(42,74,42,0.5);
+  --fd-btn-muted-text:   #a09880;
+  --fd-overlay:          rgba(6,13,6,0.95);
+  --fd-scroll-thumb:     rgba(42,74,42,0.5);
+  --fd-section-bg:       #0a160a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    box-sizing: border-box;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--fd-bg);
+    color: var(--fd-text);
+  }
+}
+
+/* ─── HarvestHub utility classes ─────────────────────────────────────── */
+.fd-bg        { background-color: var(--fd-bg); }
+.fd-bg-2      { background-color: var(--fd-bg-2); }
+.fd-bg-3      { background-color: var(--fd-bg-3); }
+.fd-surface   { background: var(--fd-surface); }
+.fd-surface-2 { background: var(--fd-surface-2); }
+.fd-text      { color: var(--fd-text); }
+.fd-text-2    { color: var(--fd-text-2); }
+.fd-text-3    { color: var(--fd-text-3); }
+.fd-text-muted { color: var(--fd-text-muted); }
+.fd-gold      { color: var(--fd-gold); }
+.fd-green     { color: var(--fd-green); }
+.fd-border    { border-color: var(--fd-border); }
+
+/* Glass card effect */
+.fd-glass {
+  background: var(--fd-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--fd-glass-border);
+}
+
+/* Theme transition — smooth swap */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow, opacity;
+  transition-duration: 220ms;
+  transition-timing-function: ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--fd-scroll-thumb);
+  border-radius: 3px;
+}
+
+/* ─── Responsive container helper ────────────────────────────────────── */
+.fd-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 1.5rem);
+}
+
+/* ─── Fluid section padding ─────────────────────────────────────────── */
+.fd-section {
+  padding-block: clamp(3rem, 8vw, 6rem);
+}
+
+/* ─── Prevent horizontal overflow project-wide ───────────────────────── */
+#root, .app-root {
+  overflow-x: hidden;
+  width: 100%;
+}
