@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useAuth } from '@/hooks/use-auth'
 import { ListingImageUpload } from './ListingImageUpload'
 import {
   Plus,
@@ -58,7 +57,6 @@ function ListingModal({
   onSave: (l: Listing) => void
   onClose: () => void
 }) {
-  const { currentUser } = useAuth()
   const isEdit = !!listing?.id
   const [form, setForm] = useState<Partial<Listing>>(
     listing ?? {
