@@ -44,11 +44,16 @@ const config = defineConfig({
     tailwindcss(),
     tanstackStart(),
     serveUploadsPlugin(),
-    forSites &&
-      nitroV2Plugin({
-        compatibilityDate: '2025-10-08',
-        preset: 'node',
-      }),
+    process.env.VERCEL
+      ? nitroV2Plugin({
+          compatibilityDate: '2025-10-08',
+          preset: 'vercel',
+        })
+      : forSites &&
+        nitroV2Plugin({
+          compatibilityDate: '2025-10-08',
+          preset: 'node',
+        }),
     devtoolsJson(),
     viteReact(),
   ],
