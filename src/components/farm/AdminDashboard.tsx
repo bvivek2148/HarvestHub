@@ -71,26 +71,28 @@ interface UserRow {
 
 // ── Design Tokens ─────────────────────────────────────────────────────────────
 const C = {
-  bg: '#06080f',
-  surface: '#0d1117',
-  surface2: '#161b22',
-  surface3: '#1c2128',
-  border: 'rgba(48,54,70,0.8)',
-  borderGlow: 'rgba(34,197,94,0.25)',
-  text: '#e6edf3',
-  textSub: '#8b949e',
-  textMuted: '#484f58',
-  green: '#22c55e',
-  greenDark: '#16a34a',
-  greenGlow: 'rgba(34,197,94,0.15)',
-  amber: '#f59e0b',
-  amberGlow: 'rgba(245,158,11,0.15)',
-  violet: '#a78bfa',
-  violetGlow: 'rgba(167,139,250,0.15)',
-  red: '#f87171',
-  redGlow: 'rgba(248,113,113,0.12)',
-  blue: '#60a5fa',
-  blueGlow: 'rgba(96,165,250,0.12)',
+  bg: 'var(--fd-bg)',
+  surface: 'var(--fd-surface)',
+  surface2: 'var(--fd-surface-2)',
+  surface3: 'var(--fd-bg-3)',
+  border: 'var(--fd-border)',
+  borderGlow: 'var(--fd-border-mid)',
+  text: 'var(--fd-text)',
+  textSub: 'var(--fd-text-2)',
+  textMuted: 'var(--fd-text-muted)',
+  green: 'var(--fd-green)',
+  greenDark: 'var(--fd-green-dark)',
+  greenGlow: 'var(--fd-green-bg)',
+  amber: 'var(--fd-gold)',
+  amberGlow: 'var(--fd-gold-bg)',
+  violet: 'var(--fd-purple)',
+  violetGlow: 'var(--fd-purple-bg)',
+  red: 'var(--fd-red)',
+  redGlow: 'var(--fd-red-bg)',
+  blue: 'var(--fd-blue)',
+  blueGlow: 'var(--fd-blue-bg)',
+  hover: 'var(--fd-hover-bg)',
+  active: 'var(--fd-active-bg)',
 }
 
 const ROLE_COLORS: Record<
@@ -106,19 +108,19 @@ const ROLE_COLORS: Record<
   buyer: {
     color: C.amber,
     bg: C.amberGlow,
-    border: 'rgba(245,158,11,0.3)',
+    border: 'var(--fd-border-mid)',
     icon: <ShoppingCart className="w-3 h-3" />,
   },
   admin: {
     color: C.violet,
     bg: C.violetGlow,
-    border: 'rgba(167,139,250,0.3)',
+    border: 'var(--fd-border-mid)',
     icon: <Shield className="w-3 h-3" />,
   },
   none: {
     color: C.textSub,
-    bg: 'rgba(139,148,158,0.1)',
-    border: 'rgba(139,148,158,0.2)',
+    bg: 'var(--fd-bg-2)',
+    border: 'var(--fd-border)',
     icon: <Users className="w-3 h-3" />,
   },
 }
@@ -185,22 +187,25 @@ function StatCard({
     <motion.div
       whileHover={{ scale: 1.02, y: -2 }}
       onClick={onClick}
-      className={`rounded-2xl p-5 relative overflow-hidden ${onClick ? 'cursor-pointer' : ''}`}
-      style={{ background: C.surface2, border: `1px solid ${C.border}` }}
+      className={`fd-card-premium rounded-2xl p-5 relative overflow-hidden ${onClick ? 'cursor-pointer' : ''}`}
+      style={{ border: `1px solid ${C.border}` }}
     >
-      <div
-        className="absolute top-0 right-0 w-24 h-24 rounded-full pointer-events-none"
-        style={{
-          background: color,
-          opacity: 0.06,
-          filter: 'blur(24px)',
-          transform: 'translate(30%,-30%)',
-        }}
-      />
+        <div
+          className="absolute top-0 right-0 w-24 h-24 rounded-full pointer-events-none"
+          style={{
+            background: color,
+            opacity: 0.08,
+            filter: 'blur(24px)',
+            transform: 'translate(30%,-30%)',
+          }}
+        />
       <div className="flex items-start justify-between mb-4">
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: `${color}18`, color }}
+          style={{ 
+            background: `color-mix(in srgb, ${color}, transparent 92%)`, 
+            color 
+          }}
         >
           {icon}
         </div>
@@ -425,7 +430,7 @@ function UserRowItem({
                         style={{ color: C.red }}
                         onMouseEnter={(e) => {
                           ;(e.currentTarget as HTMLElement).style.background =
-                            'rgba(248,113,113,0.06)'
+                            C.redGlow
                         }}
                         onMouseLeave={(e) => {
                           ;(e.currentTarget as HTMLElement).style.background =
@@ -446,7 +451,7 @@ function UserRowItem({
               style={{
                 background: C.surface3,
                 color: C.violet,
-                border: `1px solid rgba(167,139,250,0.2)`,
+                border: `1px solid ${C.violetGlow}`,
               }}
             >
               <Shield className="w-3 h-3" />
@@ -599,7 +604,7 @@ function UserDetailModal({
                 style={{
                   background: C.redGlow,
                   color: C.red,
-                  border: `1px solid rgba(248,113,113,0.2)`,
+                  border: `1px solid color-mix(in srgb, ${C.red}, transparent 60%)`,
                 }}
               >
                 <Trash2 className="w-3.5 h-3.5" /> Delete Account
@@ -659,7 +664,7 @@ function DeleteModal({
           className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
           style={{
             background: C.redGlow,
-            border: '1px solid rgba(248,113,113,0.25)',
+            border: `1px solid color-mix(in srgb, ${C.red}, transparent 75%)`,
           }}
         >
           <AlertTriangle className="w-7 h-7" style={{ color: C.red }} />
@@ -1126,7 +1131,7 @@ function OverviewTab({
                 }}
                 onMouseEnter={(e) => {
                   ;(e.currentTarget as HTMLElement).style.borderColor =
-                    `${a.color}40`
+                    `color-mix(in srgb, ${a.color}, transparent 60%)`
                 }}
                 onMouseLeave={(e) => {
                   ;(e.currentTarget as HTMLElement).style.borderColor = C.border
@@ -1134,7 +1139,7 @@ function OverviewTab({
               >
                 <div
                   className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: `${a.color}15`, color: a.color }}
+                  style={{ background: `color-mix(in srgb, ${a.color}, transparent 92%)`, color: a.color }}
                 >
                   {a.icon}
                 </div>
@@ -1181,7 +1186,7 @@ function OverviewTab({
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ background: `${m.color}18`, color: m.color }}
+              style={{ background: `color-mix(in srgb, ${m.color}, transparent 90%)`, color: m.color }}
             >
               {m.icon}
             </div>
@@ -1316,7 +1321,7 @@ function UsersTab({
                 color: C.text,
               }}
               onFocus={(e) => {
-                e.currentTarget.style.borderColor = `${C.green}60`
+                e.currentTarget.style.borderColor = `color-mix(in srgb, ${C.green}, transparent 60%)`
               }}
               onBlur={(e) => {
                 e.currentTarget.style.borderColor = C.border
@@ -1446,8 +1451,7 @@ function ApplicationsTab({
       <div
         className="rounded-2xl p-5 relative overflow-hidden"
         style={{
-          background:
-            'linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03))',
+          background: `linear-gradient(135deg, color-mix(in srgb, ${C.green}, transparent 92%), color-mix(in srgb, ${C.green}, transparent 97%))`,
           border: `1px solid ${C.borderGlow}`,
         }}
       >
@@ -1455,7 +1459,7 @@ function ApplicationsTab({
           className="absolute top-0 right-0 w-32 h-32 rounded-full pointer-events-none"
           style={{
             background: C.green,
-            opacity: 0.04,
+            opacity: 0.08,
             filter: 'blur(30px)',
             transform: 'translate(20%,-20%)',
           }}
@@ -1627,9 +1631,9 @@ function ApplicationsTab({
                     disabled={promoting}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 shrink-0"
                     style={{
-                      background: 'linear-gradient(135deg,#22c55e,#16a34a)',
-                      color: '#fff',
-                    }}
+                    background: `linear-gradient(135deg, ${C.green}, ${C.greenDark})`,
+                    color: '#fff',
+                  }}
                   >
                     {promoting ? (
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -1828,7 +1832,7 @@ function AnalyticsTab({
               <div className="flex items-center gap-3 mb-4">
                 <div
                   className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: `${r.color}18`, color: r.color }}
+                  style={{ background: `color-mix(in srgb, ${r.color}, transparent 90%)`, color: r.color }}
                 >
                   {r.icon}
                 </div>
@@ -1968,7 +1972,7 @@ function SettingsTab({
             style={{
               background: C.violetGlow,
               color: C.violet,
-              border: '1px solid rgba(167,139,250,0.3)',
+              border: `1px solid color-mix(in srgb, ${C.violet}, transparent 70%)`,
               fontFamily: "'Syne', sans-serif",
             }}
           >
@@ -2115,7 +2119,7 @@ function SettingsTab({
               }}
               onMouseEnter={(e) => {
                 ;(e.currentTarget as HTMLElement).style.borderColor =
-                  `${l.color}40`
+                  `color-mix(in srgb, ${l.color}, transparent 60%)`
               }}
               onMouseLeave={(e) => {
                 ;(e.currentTarget as HTMLElement).style.borderColor = C.border
@@ -2132,7 +2136,7 @@ function SettingsTab({
         className="rounded-2xl p-5"
         style={{
           background: C.surface2,
-          border: '1px solid rgba(248,113,113,0.2)',
+          border: `1px solid color-mix(in srgb, ${C.red}, transparent 80%)`,
         }}
       >
         <div
@@ -2150,11 +2154,11 @@ function SettingsTab({
           style={{
             background: C.redGlow,
             color: C.red,
-            border: '1px solid rgba(248,113,113,0.25)',
+            border: `1px solid color-mix(in srgb, ${C.red}, transparent 75%)`,
           }}
           onMouseEnter={(e) => {
             ;(e.currentTarget as HTMLElement).style.background =
-              'rgba(248,113,113,0.18)'
+              `color-mix(in srgb, ${C.red}, transparent 82%)`
           }}
           onMouseLeave={(e) => {
             ;(e.currentTarget as HTMLElement).style.background = C.redGlow
@@ -2297,7 +2301,7 @@ export function AdminDashboard() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-40 lg:hidden"
               style={{
-                background: 'rgba(0,0,0,0.7)',
+                background: 'rgba(0,0,0,0.85)',
                 backdropFilter: 'blur(4px)',
               }}
               onClick={() => setSidebarOpen(false)}
@@ -2555,7 +2559,7 @@ function SidebarContent({
       >
         <div
           className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: 'linear-gradient(135deg,#d97706,#92400e)' }}
+          style={{ background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})` }}
         >
           <Sprout className="w-4 h-4 text-white" />
         </div>
@@ -2564,7 +2568,7 @@ function SidebarContent({
             className="text-sm font-black leading-none"
             style={{ color: C.text, fontFamily: "'Syne', sans-serif" }}
           >
-            Harvest<span style={{ color: '#f59e0b' }}>Hub</span>
+            Harvest<span style={{ color: C.amber }}>Hub</span>
           </div>
           <div className="text-xs" style={{ color: C.textMuted }}>
             Admin Console
@@ -2587,10 +2591,10 @@ function SidebarContent({
               onClick={() => onTabChange(item.id)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-sm"
               style={{
-                background: active ? `${C.green}12` : 'transparent',
+                background: active ? `color-mix(in srgb, ${C.green}, transparent 92%)` : 'transparent',
                 color: active ? C.green : C.textSub,
                 border: active
-                  ? `1px solid ${C.green}25`
+                  ? `1px solid color-mix(in srgb, ${C.green}, transparent 85%)`
                   : '1px solid transparent',
                 fontWeight: active ? 600 : 400,
               }}
@@ -2609,10 +2613,10 @@ function SidebarContent({
               {item.badge !== undefined && item.badge > 0 && (
                 <span
                   className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
-                  style={{
-                    background: active ? `${C.green}25` : C.surface3,
-                    color: active ? C.green : C.textMuted,
-                  }}
+                    style={{
+                      background: active ? `color-mix(in srgb, ${C.green}, transparent 85%)` : C.surface3,
+                      color: active ? C.green : C.textMuted,
+                    }}
                 >
                   {item.badge}
                 </span>
@@ -2658,7 +2662,7 @@ function SidebarContent({
           style={{ color: C.red }}
           onMouseEnter={(e) => {
             ;(e.currentTarget as HTMLElement).style.background =
-              'rgba(248,113,113,0.08)'
+              `color-mix(in srgb, ${C.red}, transparent 92%)`
           }}
           onMouseLeave={(e) => {
             ;(e.currentTarget as HTMLElement).style.background = 'transparent'

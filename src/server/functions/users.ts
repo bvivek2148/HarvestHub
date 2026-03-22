@@ -91,6 +91,13 @@ export const deleteUserFn = createServerFn({ method: 'POST' }).handler(async (ct
   return { success: true }
 })
 
+export const getFarmersFn = createServerFn({ method: 'GET' }).handler(async () => {
+  const { db } = await getFirebaseAdmin()
+  const snapshot = await db.collection('users').where('role', '==', 'farmer').get()
+  const farmers = snapshot.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }))
+  return farmers
+})
+
 export const getPlatformStatsFn = createServerFn({ method: 'GET' }).handler(async () => {
   if (!(await checkAdmin())) throw new Error('Unauthorized')
   const { db } = await getFirebaseAdmin()

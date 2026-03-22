@@ -17,6 +17,7 @@ export const getFarmerOrdersFn = createServerFn({ method: 'GET' }).handler(async
   if (!userId) return []
   const { db } = await getFirebaseAdmin()
   const snapshot = await db.collection('orders').where('farmerId', '==', userId).orderBy('createdAt', 'desc').get()
+  console.log(`[getFarmerOrders] Found ${snapshot.size} orders for farmer ${userId}`)
   return snapshot.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }))
 })
 
@@ -25,6 +26,7 @@ export const getBuyerOrdersFn = createServerFn({ method: 'GET' }).handler(async 
   if (!userId) return []
   const { db } = await getFirebaseAdmin()
   const snapshot = await db.collection('orders').where('buyerId', '==', userId).orderBy('createdAt', 'desc').get()
+  console.log(`[getBuyerOrders] Found ${snapshot.size} orders for buyer ${userId}`)
   return snapshot.docs.map(doc => sanitizeData({ id: doc.id, ...doc.data() }))
 })
 
@@ -34,13 +36,31 @@ export const createOrderFn = createServerFn({ method: 'POST' }).handler(async (c
   if (!userId) throw new Error('Unauthorized')
   const { db } = await getFirebaseAdmin()
   const listingDoc = await db.collection('listings').doc(data.listingId).get()
-  const listingName = listingDoc.data()?.name || 'New Produce'
-  const order = { ...data, buyerId: userId, status: 'pending' as OrderStatus, createdAt: new Date() }
+  const listingData = listingDoc.data()
+  const listingName = listingData?.name || 'New Produce'
+  const emoji = listingData?.emoji || '📦'
+  const category = listingData?.category || 'Vegetables'
+
+  const userDoc = await db.collection('users').doc(userId).get()
+  const buyerName = userDoc.data()?.name || 'Buyer'
+
+  const order = { 
+    ...data, 
+    buyerId: userId, 
+    buyerName,
+    listingName,
+    emoji,
+    category,
+    status: 'pending' as OrderStatus, 
+    createdAt: new Date() 
+  }
+  console.log('[createOrder] Creating order:', order)
   const docRef = await db.collection('orders').add(order)
+  console.log('[createOrder] Order created with ID:', docRef.id)
   await db.collection('notifications').add({
     userId: data.farmerId,
     title: 'New Order! 📦',
-    message: `You received a new order for ${listingName}.`,
+    message: `You received a new order for ${listingName} from ${buyerName}.`,
     type: 'order',
     read: false,
     createdAt: new Date()

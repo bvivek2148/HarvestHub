@@ -15,6 +15,9 @@ import {
   type OrderStatus,
 } from './BuyerTypes'
 import { toast } from 'sonner'
+import { useQuery } from '@tanstack/react-query'
+import { getBuyerOrdersFn } from '@/server/functions/orders'
+import { Loader2 } from 'lucide-react'
 
 type FilterVal = OrderStatus | 'all'
 
@@ -61,7 +64,7 @@ function TrackingTimeline({ status }: { status: OrderStatus }) {
         <div
           className="absolute top-3 left-0 h-0.5 transition-all duration-700"
           style={{
-            background: `linear-gradient(90deg, ${C.green}, ${C.green2})`,
+            background: `linear-gradient(90deg, ${C.green}, ${C.greenLight || C.green})`,
             width: `${(currentIndex / (steps.length - 1)) * 100}%`,
           }}
         />
@@ -111,13 +114,16 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
       style={{ background: C.surface, border: `1px solid ${C.border}` }}
     >
       <div
-        className="p-5 cursor-pointer hover:bg-white/[0.02] transition-colors"
+        className="p-5 cursor-pointer transition-colors"
+        style={{ background: 'transparent' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => setExpanded((v) => !v)}
       >
         <div className="flex items-start gap-4">
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
-            style={{ background: 'rgba(255,255,255,0.04)' }}
+            style={{ background: C.surface2, border: `1px solid ${C.border}` }}
           >
             {order.emoji}
           </div>
@@ -134,7 +140,7 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
                 style={{
                   background: sc.bg,
                   color: sc.color,
-                  border: `1px solid ${sc.color}33`,
+                  border: `1px solid color-mix(in srgb, ${sc.color}, transparent 80%)`,
                 }}
               >
                 {sc.icon} {sc.label}
@@ -149,10 +155,10 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <div className="text-lg font-bold" style={{ color: C.gold }}>
-              ₹{parseFloat(order.total.replace(/[₹$]/, '')).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              ₹{parseFloat(String(order.total).replace(/[₹$]/, '')).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </div>
             <div className="text-[10px] mt-0.5" style={{ color: C.muted }}>
-              ₹{(parseFloat(order.total.replace(/[₹$]/, '')) / parseFloat(order.qty)).toFixed(2)}/item
+              ₹{(parseFloat(String(order.total).replace(/[₹$]/, '')) / parseFloat(String(order.qty))).toFixed(2)}/item
             </div>
             <ChevronDown
               className="w-4 h-4 transition-transform duration-300"
@@ -241,9 +247,9 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
                     onClick={() => toast.success('Reorder placed!')}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all hover:scale-105"
                     style={{
-                      background: 'rgba(74,222,128,0.12)',
+                      background: `color-mix(in srgb, ${C.green}, transparent 88%)`,
                       color: C.green,
-                      border: '1px solid rgba(74,222,128,0.3)',
+                      border: `1px solid color-mix(in srgb, ${C.green}, transparent 70%)`,
                     }}
                   >
                     <RotateCcw className="w-3 h-3" /> Reorder
@@ -254,9 +260,9 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
                     onClick={() => toast.error('Cancellation requested')}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all hover:scale-105"
                     style={{
-                      background: 'rgba(248,113,113,0.1)',
+                      background: `color-mix(in srgb, ${C.red}, transparent 90%)`,
                       color: C.red,
-                      border: '1px solid rgba(248,113,113,0.25)',
+                      border: `1px solid color-mix(in srgb, ${C.red}, transparent 75%)`,
                     }}
                   >
                     <XCircle className="w-3 h-3" /> Cancel
@@ -266,9 +272,9 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
                   onClick={() => toast.info('Support contacted')}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all hover:scale-105"
                   style={{
-                    background: 'rgba(96,165,250,0.1)',
+                    background: `color-mix(in srgb, ${C.blue}, transparent 90%)`,
                     color: C.blue,
-                    border: '1px solid rgba(96,165,250,0.25)',
+                    border: `1px solid color-mix(in srgb, ${C.blue}, transparent 75%)`,
                   }}
                 >
                   Help
@@ -285,9 +291,26 @@ function OrderCard({ order, index }: { order: OrderItem; index: number }) {
 export function BuyerOrdersTab() {
   const [filter, setFilter] = useState<FilterVal>('all')
   const [search, setSearch] = useState('')
-  const orders: OrderItem[] = []
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ['buyerOrders'],
+    queryFn: () => getBuyerOrdersFn()
+  })
 
-  const filtered = orders.filter((o) => {
+  // Map backend orders to UI OrderItem
+  const mappedOrders: OrderItem[] = (orders as any[]).map(o => ({
+    id: o.id.slice(0, 8).toUpperCase(),
+    product: o.listingName || 'Fresh Produce',
+    farmer: o.farmerName || 'Local Farmer',
+    qty: `${o.qty} units`,
+    total: `₹${o.total}`,
+    status: o.status === 'shipped' ? 'dispatched' : (o.status as OrderStatus),
+    date: new Date(o.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
+    emoji: o.emoji || '📦',
+    category: o.category || 'Vegetables',
+    rating: o.rating
+  }))
+
+  const filtered = mappedOrders.filter((o) => {
     const matchStatus = filter === 'all' || o.status === filter
     const matchSearch =
       o.product.toLowerCase().includes(search.toLowerCase()) ||
@@ -300,9 +323,18 @@ export function BuyerOrdersTab() {
   FILTER_OPTIONS.forEach((opt) => {
     counts[opt.value] =
       opt.value === 'all'
-        ? orders.length
-        : orders.filter((o) => o.status === opt.value).length
+        ? mappedOrders.length
+        : mappedOrders.filter((o) => o.status === opt.value).length
   })
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3" style={{ color: C.muted }}>
+        <Loader2 className="w-8 h-8 animate-spin" style={{ color: C.green }} />
+        <p className="text-sm">Fetching your orders…</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-5">
@@ -357,11 +389,11 @@ export function BuyerOrdersTab() {
             onClick={() => setFilter(opt.value)}
             className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all"
             style={{
-              background: filter === opt.value ? C.green + '20' : C.surface2,
+              background: filter === opt.value ? `color-mix(in srgb, ${C.green}, transparent 88%)` : C.surface2,
               color: filter === opt.value ? C.green : C.muted,
               border:
                 filter === opt.value
-                  ? `1px solid ${C.green}40`
+                  ? `1px solid color-mix(in srgb, ${C.green}, transparent 75%)`
                   : `1px solid ${C.border}`,
             }}
           >
@@ -374,8 +406,8 @@ export function BuyerOrdersTab() {
                 style={{
                   background:
                     filter === opt.value
-                      ? C.green + '30'
-                      : 'rgba(255,255,255,0.06)',
+                      ? `color-mix(in srgb, ${C.green}, transparent 82%)`
+                      : `color-mix(in srgb, ${C.text}, transparent 94%)`,
                   color: filter === opt.value ? C.green : C.muted,
                 }}
               >

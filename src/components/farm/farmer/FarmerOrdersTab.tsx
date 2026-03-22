@@ -40,7 +40,7 @@ function OrderDetailModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <motion.div
@@ -49,8 +49,8 @@ function OrderDetailModal({
         exit={{ scale: 0.92, opacity: 0 }}
         className="rounded-2xl w-full max-w-md overflow-hidden"
         style={{
-          background: '#080f08',
-          border: '1px solid rgba(74,222,128,0.18)',
+          background: C.surface,
+          border: `1px solid ${C.border}`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -97,12 +97,12 @@ function OrderDetailModal({
             <div
               className="w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold shrink-0"
               style={{
-                background: 'rgba(74,222,128,0.12)',
+                background: `color-mix(in srgb, ${C.green}, transparent 88%)`,
                 color: C.green,
                 fontFamily: "'Syne', sans-serif",
               }}
             >
-              {order.buyer
+              {String(order.buyer || 'Buyer')
                 .split(' ')
                 .map((w) => w[0])
                 .join('')
@@ -123,7 +123,7 @@ function OrderDetailModal({
             <div className="flex items-start gap-3">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                style={{ background: 'rgba(74,222,128,0.08)', color: C.green }}
+                style={{ background: `color-mix(in srgb, ${C.green}, transparent 92%)`, color: C.green }}
               >
                 <Package className="w-4 h-4" />
               </div>
@@ -142,7 +142,7 @@ function OrderDetailModal({
             <div className="flex items-start gap-3">
               <div
                 className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-base"
-                style={{ background: 'rgba(240,180,41,0.08)' }}
+                style={{ background: `color-mix(in srgb, ${C.gold}, transparent 92%)` }}
               >
                 💰
               </div>
@@ -154,7 +154,7 @@ function OrderDetailModal({
                   Total
                 </div>
                 <div className="text-sm font-bold" style={{ color: C.gold }}>
-                  ₹{parseFloat(order.total.replace(/[₹$]/, '')).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  ₹{parseFloat(String(order.total).replace(/[₹$]/, '') || '0').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@ function OrderDetailModal({
               <div className="flex items-start gap-3">
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: 'rgba(96,165,250,0.08)', color: C.blue }}
+                  style={{ background: `color-mix(in srgb, ${C.blue}, transparent 92%)`, color: C.blue }}
                 >
                   <MapPin className="w-4 h-4" />
                 </div>
@@ -184,7 +184,7 @@ function OrderDetailModal({
                 <div
                   className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                   style={{
-                    background: 'rgba(167,139,250,0.08)',
+                    background: `color-mix(in srgb, ${C.purple}, transparent 92%)`,
                     color: C.purple,
                   }}
                 >
@@ -228,9 +228,9 @@ function OrderDetailModal({
                           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all"
                           style={{
                             background: done
-                              ? sc2.color + '20'
-                              : 'rgba(255,255,255,0.04)',
-                            border: `2px solid ${done ? sc2.color : 'rgba(255,255,255,0.1)'}`,
+                              ? `color-mix(in srgb, ${sc2.color}, transparent 88%)`
+                              : C.surface2,
+                            border: `2px solid ${done ? sc2.color : C.border}`,
                             color: done ? sc2.color : C.muted,
                           }}
                         >
@@ -249,8 +249,8 @@ function OrderDetailModal({
                           style={{
                             background:
                               i < stepIdx
-                                ? C.green + '60'
-                                : 'rgba(255,255,255,0.06)',
+                                ? `color-mix(in srgb, ${C.green}, transparent 60%)`
+                                : C.border,
                           }}
                         />
                       )}
@@ -282,9 +282,9 @@ function OrderDetailModal({
               <div
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
                 style={{
-                  background: 'rgba(74,222,128,0.1)',
+                  background: `color-mix(in srgb, ${C.green}, transparent 90%)`,
                   color: C.green,
-                  border: `1px solid ${C.green}30`,
+                  border: `1px solid color-mix(in srgb, ${C.green}, transparent 70%)`,
                 }}
               >
                 <CheckCircle className="w-4 h-4" /> Delivered ✓
@@ -353,8 +353,8 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                 onClick={() => setFilterStatus(filterStatus === s ? 'all' : s)}
                 className="rounded-xl p-3 text-left transition-all hover:scale-[1.02]"
                 style={{
-                  background: filterStatus === s ? sc.color + '15' : C.surface,
-                  border: `1px solid ${filterStatus === s ? sc.color + '44' : C.border}`,
+                  background: filterStatus === s ? `color-mix(in srgb, ${sc.color}, transparent 92%)` : C.surface,
+                  border: `1px solid ${filterStatus === s ? `color-mix(in srgb, ${sc.color}, transparent 75%)` : C.border}`,
                 }}
               >
                 <div
@@ -391,8 +391,8 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                 background:
                   filterStatus === s
                     ? s === 'all'
-                      ? C.green + '18'
-                      : ORDER_STATUS[s].color + '18'
+                      ? `color-mix(in srgb, ${C.green}, transparent 90%)`
+                      : `color-mix(in srgb, ${ORDER_STATUS[s].color}, transparent 90%)`
                     : C.surface2,
                 color:
                   filterStatus === s
@@ -400,7 +400,7 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                       ? C.green
                       : ORDER_STATUS[s].color
                     : C.muted,
-                border: `1px solid ${filterStatus === s ? (s === 'all' ? C.green + '44' : ORDER_STATUS[s].color + '44') : C.border}`,
+                border: `1px solid ${filterStatus === s ? (s === 'all' ? `color-mix(in srgb, ${C.green}, transparent 70%)` : `color-mix(in srgb, ${ORDER_STATUS[s].color}, transparent 70%)`) : C.border}`,
               }}
             >
               {s === 'all'
@@ -452,7 +452,7 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0"
                     style={{
-                      background: 'rgba(255,255,255,0.03)',
+                      background: C.hover,
                       border: `1px solid ${C.border}`,
                     }}
                   >
@@ -475,7 +475,7 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                       </span>
                     </div>
                     <div className="text-xs mt-0.5" style={{ color: C.muted }}>
-                      <strong style={{ color: '#b5ceb5' }}>
+                      <strong style={{ color: C.green }}>
                         {order.buyer}
                       </strong>{' '}
                       · {order.product} · {order.qty}
@@ -493,7 +493,7 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                       className="text-base font-bold"
                       style={{ color: C.gold }}
                     >
-                      ₹{parseFloat(order.total.replace(/[₹$]/, '')).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      ₹{parseFloat(String(order.total).replace(/[₹$]/, '') || '0').toLocaleString('en-IN', { minimumFractionDigits: 2 })}
                     </div>
                     <button
                       onClick={() =>
@@ -560,9 +560,9 @@ export function FarmerOrdersTab({ orders, onUpdateStatus }: Props) {
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all hover:opacity-90"
                               style={{
                                 background:
-                                  ORDER_STATUS[nextStatus].color + '18',
+                                  `color-mix(in srgb, ${ORDER_STATUS[nextStatus].color}, transparent 90%)`,
                                 color: ORDER_STATUS[nextStatus].color,
-                                border: `1px solid ${ORDER_STATUS[nextStatus].color}44`,
+                                border: `1px solid color-mix(in srgb, ${ORDER_STATUS[nextStatus].color}, transparent 75%)`,
                               }}
                             >
                               <CheckCircle className="w-3 h-3" /> Mark{' '}

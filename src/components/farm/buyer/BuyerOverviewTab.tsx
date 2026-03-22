@@ -59,19 +59,21 @@ function StatCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      className="rounded-2xl p-5 relative overflow-hidden group cursor-default"
-      style={{ background: C.surface, border: `1px solid ${C.border}` }}
+      className="fd-card-premium rounded-2xl p-5 relative overflow-hidden group cursor-default"
+      style={{ border: `1px solid ${C.border}` }}
     >
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          background: `radial-gradient(circle at 80% 20%, ${color}08, transparent 60%)`,
+          background: `radial-gradient(circle at 80% 20%, color-mix(in srgb, ${color}, transparent 97%), transparent 60%)`,
         }}
       />
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-        style={{ background: color + '18', color }}
+        style={{ 
+          background: `color-mix(in srgb, ${color}, transparent 90%)`, 
+          color 
+        }}
       >
         {icon}
       </div>
@@ -99,8 +101,8 @@ function OrderRow({ order, index }: { order: OrderItem; index: number }) {
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: index * 0.06 }}
       whileHover={{ x: 3 }}
-      className="flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
-      style={{ background: C.surface2, border: `1px solid ${C.border}` }}
+      className="fd-card-premium flex items-center gap-4 p-4 rounded-xl cursor-pointer transition-all duration-200"
+      style={{ border: `1px solid ${C.border}` }}
     >
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
@@ -169,7 +171,7 @@ export function BuyerOverviewTab({
 }: Props) {
   const totalSpent = orders
     .filter((o) => o.status === 'delivered')
-    .reduce((s, o) => s + parseFloat(o.total.replace(/[₹$]/, '')), 0)
+    .reduce((s, o) => s + parseFloat(String(o.total).replace(/[₹$]/, '')), 0)
 
   const savedCount = wishlist.length
   const activeOrders = orders.filter((o) => ['pending', 'confirmed', 'dispatched'].includes(o.status)).length
@@ -237,9 +239,9 @@ export function BuyerOverviewTab({
         transition={{ duration: 0.5 }}
         className="rounded-2xl p-6 sm:p-8 relative overflow-hidden"
         style={{
-          background:
-            'linear-gradient(135deg, #061a0c 0%, #0d3320 50%, #071a10 100%)',
-          border: '1px solid rgba(74,222,128,0.2)',
+          background: `linear-gradient(135deg, var(--fd-green-dark), var(--fd-green))`,
+          border: `1px solid color-mix(in srgb, var(--fd-green), transparent 60%)`,
+          boxShadow: `0 12px 40px color-mix(in srgb, var(--fd-green), transparent 85%)`,
         }}
       >
         <div
@@ -267,7 +269,7 @@ export function BuyerOverviewTab({
                 Good morning
               </p>
               <h2
-                className="font-bold text-[#f5f0e8] mb-1"
+                className="font-bold text-white mb-1"
                 style={{
                   fontFamily: "'Syne', sans-serif",
                   fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
@@ -275,7 +277,7 @@ export function BuyerOverviewTab({
               >
                 Welcome back, {displayName}! 👋
               </h2>
-              <p className="text-sm" style={{ color: C.muted }}>
+              <p className="text-sm text-white/80">
                 Your fresh produce is just a click away.
               </p>
             </div>
@@ -334,8 +336,8 @@ export function BuyerOverviewTab({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Spending Chart */}
         <div
-          className="lg:col-span-2 rounded-2xl p-5"
-          style={{ background: C.surface, border: `1px solid ${C.border}` }}
+          className="lg:col-span-2 fd-card-premium rounded-2xl p-5"
+          style={{ border: `1px solid ${C.border}` }}
         >
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -620,8 +622,8 @@ export function BuyerOverviewTab({
             onClick={action.onClick}
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all"
-            style={{ background: C.surface2, border: `1px solid ${C.border}` }}
+            className="fd-card-premium rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all"
+            style={{ border: `1px solid ${C.border}` }}
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"

@@ -34,9 +34,10 @@ import { FarmerOrdersTab } from './farmer/FarmerOrdersTab'
 import { FarmerAnalyticsTab } from './farmer/FarmerAnalyticsTab'
 import { FarmerChatTab } from './farmer/FarmerChatTab'
 import { FarmerSettingsModal } from './farmer/FarmerSettingsModal'
+import { FarmerSettingsTab } from './farmer/FarmerSettingsTab'
 import { FarmerNotificationsPanel } from './farmer/FarmerNotificationsPanel'
 
-type Tab = 'overview' | 'listings' | 'orders' | 'analytics' | 'chat'
+type Tab = 'overview' | 'listings' | 'orders' | 'analytics' | 'chat' | 'profile'
 
 import { useNotifications } from '@/hooks/use-notifications'
 import { useChatThreads } from '@/hooks/use-firestore-chat'
@@ -81,7 +82,7 @@ export function FarmerDashboard() {
     (localDisplayName ?? currentUser?.name) ||
     currentUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] ||
     'Farmer'
-  const initials = displayName
+  const initials = String(displayName || 'Farmer')
     .split(' ')
     .map((w: string) => w[0])
     .join('')
@@ -194,6 +195,11 @@ export function FarmerDashboard() {
       label: 'Messages',
       badge: unreadMsgs,
     },
+    {
+      id: 'profile',
+      icon: <Settings className="w-4 h-4" />,
+      label: 'Farm Details',
+    },
   ]
 
   const SidebarContent = () => (
@@ -232,10 +238,9 @@ export function FarmerDashboard() {
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
             style={{
-              background:
-                'linear-gradient(135deg, rgba(74,222,128,0.3), rgba(74,222,128,0.08))',
+              background: `linear-gradient(135deg, color-mix(in srgb, ${C.green}, transparent 75%), color-mix(in srgb, ${C.green}, transparent 92%))`,
               color: C.green,
-              border: '2px solid rgba(74,222,128,0.3)',
+              border: `2px solid color-mix(in srgb, ${C.green}, transparent 75%)`,
               fontFamily: "'Syne', sans-serif",
             }}
           >
@@ -267,9 +272,9 @@ export function FarmerDashboard() {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm"
             style={{
               background:
-                activeTab === item.id ? 'rgba(74,222,128,0.1)' : 'transparent',
+                activeTab === item.id ? C.hover : 'transparent',
               color: activeTab === item.id ? C.green : C.muted,
-              border: `1px solid ${activeTab === item.id ? 'rgba(74,222,128,0.25)' : 'transparent'}`,
+              border: `1px solid ${activeTab === item.id ? C.border2 : 'transparent'}`,
               fontWeight: activeTab === item.id ? 600 : 400,
             }}
           >
@@ -281,8 +286,8 @@ export function FarmerDashboard() {
                 style={{
                   background:
                     activeTab === item.id
-                      ? C.green + '30'
-                      : 'rgba(255,255,255,0.08)',
+                      ? `color-mix(in srgb, ${C.green}, transparent 82%)`
+                      : C.hover,
                   color: activeTab === item.id ? C.green : C.muted,
                 }}
               >
@@ -303,16 +308,20 @@ export function FarmerDashboard() {
             setShowSettings(true)
             setSidebarOpen(false)
           }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all hover:bg-white/[0.04]"
-          style={{ color: C.muted }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+          style={{ color: C.muted, background: 'transparent' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <Settings className="w-4 h-4" />
-          Settings & Profile
+          Settings
         </button>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all hover:bg-red-950/30"
-          style={{ color: C.red }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
+          style={{ color: C.red, background: 'transparent' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <LogOut className="w-4 h-4" />
           Sign Out
@@ -445,10 +454,9 @@ export function FarmerDashboard() {
                 onClick={() => setShowSettings(true)}
                 className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-transform hover:scale-105"
                 style={{
-                  background:
-                    'linear-gradient(135deg,rgba(74,222,128,0.3),rgba(74,222,128,0.1))',
+                  background: `linear-gradient(135deg, color-mix(in srgb, ${C.green}, transparent 75%), color-mix(in srgb, ${C.green}, transparent 90%))`,
                   color: C.green,
-                  border: '1px solid rgba(74,222,128,0.4)',
+                  border: `1px solid color-mix(in srgb, ${C.green}, transparent 68%)`,
                   fontFamily: "'Syne', sans-serif",
                 }}
               >
@@ -535,6 +543,17 @@ export function FarmerDashboard() {
                   transition={{ duration: 0.3 }}
                 >
                   <FarmerChatTab />
+                </motion.div>
+              )}
+              {activeTab === 'profile' && (
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <FarmerSettingsTab profile={profile} />
                 </motion.div>
               )}
             </AnimatePresence>

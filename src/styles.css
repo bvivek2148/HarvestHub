@@ -90,24 +90,24 @@ code {
   --fd-border-strong:    rgba(16,163,74,0.45);
 
   /* Typography */
-  --fd-text:             #1c2d1c;          /* deep forest */
-  --fd-text-2:           #374e37;          /* forest-700 */
+  --fd-text:             #1a201c;          /* slightly deeper forest */
+  --fd-text-2:           #2d3a31;          /* forest-800 */
   --fd-text-3:           #4b5563;          /* slate-600 */
-  --fd-text-muted:       #78716c;          /* stone-500 */
+  --fd-text-muted:       #71717a;          /* zinc-500 */
 
   /* Brand colours */
-  --fd-gold:             #d97706;          /* amber-600 */
-  --fd-gold-light:       #f59e0b;          /* amber-400 */
-  --fd-gold-bg:          #fef3c7;          /* amber-100 soft */
-  --fd-green:            #16a34a;          /* emerald-600 */
-  --fd-green-light:      #22c55e;          /* emerald-400 */
+  --fd-gold:             #c2410c;          /* orange-700 for better light mode contrast */
+  --fd-gold-light:       #ea580c;          /* orange-600 */
+  --fd-gold-bg:          #fff7ed;          /* orange-50 */
+  --fd-green:            #15803d;          /* green-700 */
+  --fd-green-light:      #16a34a;          /* green-600 */
   --fd-green-dark:       #14532d;          /* emerald-900 */
-  --fd-green-bg:         #dcfce7;          /* emerald-100 */
+  --fd-green-bg:         #f0fdf4;          /* green-50 */
 
   /* Nav */
-  --fd-nav-bg:           rgba(255,255,255,0.96);
-  --fd-nav-link:         #374e37;
-  --fd-nav-link-hover:   #1c2d1c;
+  --fd-nav-bg:           #ffffff;
+  --fd-nav-link:         #4b5563;
+  --fd-nav-link-hover:   #15803d;
 
   /* Hero — dark cinematic overlay on photos */
   --fd-hero-bg:          #14532d;          /* deep forest gradient base */
@@ -130,11 +130,16 @@ code {
   --fd-input-bg:         #ffffff;
   --fd-input-border:     rgba(16,163,74,0.25);
 
-  /* Footer — stays dark for contrast */
+  /* Footer — stays dark for contrast, but theme-aware */
   --fd-footer-bg:        #14532d;
+  --fd-footer-text:      rgba(255, 255, 255, 0.65);
+  --fd-footer-heading:   #fbbf24;
+  --fd-footer-border:    rgba(255, 255, 255, 0.1);
+  --fd-footer-icon-bg:   rgba(255, 255, 255, 0.08);
+  --fd-footer-accent:    #f59e0b;
 
-  /* Modals */
-  --fd-modal-bg:         #ffffff;
+  /* Overlay */
+  --fd-overlay:          rgba(20,83,45,0.65);
   --fd-modal-border:     rgba(16,163,74,0.2);
 
   /* Tags / muted buttons */
@@ -151,7 +156,19 @@ code {
   --fd-scroll-thumb:     rgba(16,163,74,0.3);
 
   /* Section */
-  --fd-section-bg:       #f0fdf4;          /* emerald-50 tint */
+  --fd-section-bg:       #fafaf9;
+
+  /* Interactions */
+  --fd-hover-bg:         rgba(16,163,74,0.05);
+  --fd-active-bg:        rgba(16,163,74,0.1);
+
+  /* Status Colors (Light) */
+  --fd-red:              #ef4444;
+  --fd-blue:             #3b82f6;
+  --fd-purple:           #8b5cf6;
+  --fd-red-bg:           #fee2e2;
+  --fd-blue-bg:          #dbeafe;
+  --fd-purple-bg:        #f3e8ff;
 }
 
 .dark {
@@ -240,6 +257,34 @@ code {
   --fd-overlay:          rgba(6,13,6,0.95);
   --fd-scroll-thumb:     rgba(42,74,42,0.5);
   --fd-section-bg:       #0a160a;
+
+  /* Footer */
+  --fd-footer-bg:        #030a03;
+  --fd-footer-text:      rgba(255, 255, 255, 0.5);
+  --fd-footer-heading:   #fbbf24;
+  --fd-footer-border:    rgba(255, 255, 255, 0.08);
+  --fd-footer-icon-bg:   rgba(255, 255, 255, 0.08);
+  --fd-footer-accent:    #f59e0b;
+
+  /* Interactions */
+  --fd-hover-bg:         rgba(255,255,255,0.04);
+  --fd-active-bg: color-mix(in srgb, var(--fd-green), transparent 85%);
+
+  /* Status Colors (Dark) */
+  --fd-red:              #f87171;
+  --fd-blue:             #60a5fa;
+  --fd-purple:           #a78bfa;
+  --fd-red-bg:           rgba(248,113,113,0.08);
+  --fd-blue-bg:          rgba(96,165,250,0.08);
+  --fd-purple-bg:        rgba(167,139,250,0.08);
+
+  /* Footer */
+  --fd-footer-bg: #030a03;
+  --fd-footer-text: rgba(255, 255, 255, 0.5);
+  --fd-footer-heading: #fbbf24;
+  --fd-footer-border: rgba(255, 255, 255, 0.08);
+  --fd-footer-icon-bg: rgba(255, 255, 255, 0.08);
+  --fd-footer-accent: #f59e0b;
 }
 
 @theme inline {
@@ -313,6 +358,27 @@ code {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--fd-glass-border);
+}
+
+.fd-card-premium {
+  background: var(--fd-card-bg);
+  border: 1px solid var(--fd-border);
+  box-shadow: var(--fd-card-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fd-card-premium:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(16,163,74,0.15), 
+              0 0 0 1px var(--fd-border-mid);
+}
+
+.fd-glass-premium {
+  background: var(--fd-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--fd-glass-border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.03);
 }
 
 /* Theme transition — smooth swap */

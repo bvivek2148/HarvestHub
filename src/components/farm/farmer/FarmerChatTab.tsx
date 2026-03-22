@@ -102,7 +102,7 @@ export function FarmerChatTab() {
                     className="text-xs mt-0.5 truncate"
                     style={{ color: unread > 0 ? '#b5ceb5' : C.muted }}
                   >
-                    {thread.lastMessage}
+                    {thread.lastMessage || (thread as any).lastMsg}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">

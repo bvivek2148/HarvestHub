@@ -7,6 +7,7 @@ import appCss from '../styles.css?url'
 
 import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { useFirebaseAuth } from '@/hooks/use-firebase-auth'
+import { CartProvider } from '@/context/CartContext'
 
 import { useEffect } from 'react'
 import type { QueryClient } from '@tanstack/react-query'
@@ -131,9 +132,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           disableTransitionOnChange
         >
           <ClerkProvider>
-            <FirebaseSync />
-            {children}
-            <Toaster />
+            <CartProvider>
+              <FirebaseSync />
+              {children}
+              <Toaster />
+            </CartProvider>
           </ClerkProvider>
         </ThemeProvider>
         <Scripts />

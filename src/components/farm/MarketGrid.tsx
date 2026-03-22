@@ -17,6 +17,35 @@ import {
 import { ProduceCard, type ProduceItem } from './ProduceCard'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAllListingsFn, toggleWishlistFn, getWishlistFn } from '@/server/functions/listings'
+import { getOrCreateThreadFn } from '@/server/functions/messages'
+import { useCart } from '@/context/CartContext'
+import { toast } from 'sonner'
+import { useRouter } from '@tanstack/react-router'
+
+
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+const C = {
+  bg: 'var(--fd-bg)',
+  bg2: 'var(--fd-bg-2)',
+  surface: 'var(--fd-surface)',
+  surface2: 'var(--fd-surface-2)',
+  border: 'var(--fd-border)',
+  borderGlow: 'var(--fd-border-mid)',
+  text: 'var(--fd-text)',
+  textSub: 'var(--fd-text-2)',
+  textMuted: 'var(--fd-text-muted)',
+  green: 'var(--fd-green)',
+  greenDark: 'var(--fd-green-dark)',
+  greenGlow: 'var(--fd-green-bg)',
+  amber: 'var(--fd-gold)',
+  amberGlow: 'var(--fd-gold-bg)',
+  red: 'var(--fd-red)',
+  redGlow: 'var(--fd-red-bg)',
+  blue: 'var(--fd-blue)',
+  blueGlow: 'var(--fd-blue-bg)',
+  hover: 'var(--fd-hover-bg)',
+  active: 'var(--fd-active-bg)',
+}
 
 
 
@@ -39,10 +68,6 @@ const SORT_OPTIONS = [
 
 type ViewMode = 'card' | 'favourite' | 'compare'
 
-export interface CartEntry {
-  item: ProduceItem
-  qty: number
-}
 
 interface ViewToggleProps {
   mode: ViewMode
@@ -71,25 +96,25 @@ function ViewToggle({
         fontFamily: "'DM Sans', sans-serif",
         background: isActive
           ? mode === 'favourite'
-            ? 'rgba(239,68,68,0.12)'
+            ? C.redGlow
             : mode === 'compare'
-              ? 'rgba(59,130,246,0.12)'
-              : 'rgba(217,119,6,0.12)'
-          : 'var(--fd-surface)',
+              ? C.blueGlow
+              : C.amberGlow
+          : C.surface,
         border: isActive
           ? mode === 'favourite'
-            ? '1px solid rgba(239,68,68,0.4)'
+            ? `1px solid color-mix(in srgb, ${C.red}, transparent 60%)`
             : mode === 'compare'
-              ? '1px solid rgba(59,130,246,0.4)'
-              : '1px solid rgba(217,119,6,0.4)'
-          : '1px solid var(--fd-border)',
+              ? `1px solid color-mix(in srgb, ${C.blue}, transparent 60%)`
+              : `1px solid color-mix(in srgb, ${C.amber}, transparent 60%)`
+          : `1px solid ${C.border}`,
         color: isActive
           ? mode === 'favourite'
-            ? '#ef4444'
+            ? C.red
             : mode === 'compare'
-              ? '#3b82f6'
-              : '#d97706'
-          : 'var(--fd-text-muted)',
+              ? C.blue
+              : C.amber
+          : C.textMuted,
       }}
     >
       {icon}
@@ -100,12 +125,12 @@ function ViewToggle({
           style={{
             background: isActive
               ? mode === 'favourite'
-                ? '#ef4444'
+                ? C.red
                 : mode === 'compare'
-                  ? '#3b82f6'
-                  : '#d97706'
+                  ? C.blue
+                  : C.amber
               : 'var(--fd-bg-2)',
-            color: isActive ? '#fff' : 'var(--fd-text-muted)',
+            color: isActive ? '#fff' : C.textMuted,
           }}
         >
           {count}
@@ -122,12 +147,12 @@ function CartDrawer({
   onUpdateQty,
   onRemove,
 }: {
-  cartItems: CartEntry[]
+  cartItems: any[]
   onClose: () => void
   onUpdateQty: (id: string, qty: number) => void
   onRemove: (id: string) => void
 }) {
-  const subtotal = cartItems.reduce((s, e) => s + e.item.price * e.qty, 0)
+  const subtotal = cartItems.reduce((s, e) => s + e.price * e.quantity, 0)
   const platformFee = subtotal * 0.05
   const total = subtotal + platformFee
 
@@ -137,7 +162,7 @@ function CartDrawer({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[200] flex justify-end"
-      style={{ background: 'rgba(20,83,45,0.5)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
@@ -160,7 +185,7 @@ function CartDrawer({
           }}
         >
           <div className="flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5" style={{ color: '#d97706' }} />
+            <ShoppingCart className="w-5 h-5" style={{ color: C.amber }} />
             <span
               className="text-base font-bold"
               style={{
@@ -173,9 +198,9 @@ function CartDrawer({
             {cartItems.length > 0 && (
               <span
                 className="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center"
-                style={{ background: '#d97706', color: '#ffffff' }}
+                style={{ background: C.amber, color: '#ffffff' }}
               >
-                {cartItems.reduce((s, e) => s + e.qty, 0)}
+                {cartItems.reduce((s, e) => s + e.quantity, 0)}
               </span>
             )}
           </div>
@@ -213,9 +238,9 @@ function CartDrawer({
               </p>
             </div>
           ) : (
-            cartItems.map((entry) => (
+            cartItems.map((item) => (
               <motion.div
-                key={entry.item.id}
+                key={item.id}
                 layout
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -226,11 +251,13 @@ function CartDrawer({
                   border: '1px solid var(--fd-border)',
                 }}
               >
-                <img
-                  src={entry.item.image}
-                  alt={entry.item.name}
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover shrink-0"
-                />
+                {item.imageUrl && (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl object-cover shrink-0"
+                  />
+                )}
                 <div className="flex-1 min-w-0">
                   <p
                     className="text-sm font-semibold truncate"
@@ -239,7 +266,7 @@ function CartDrawer({
                       color: 'var(--fd-text)',
                     }}
                   >
-                    {entry.item.name}
+                    {item.name}
                   </p>
                   <p
                     className="text-xs mb-2"
@@ -248,16 +275,16 @@ function CartDrawer({
                       color: 'var(--fd-text-muted)',
                     }}
                   >
-                    {entry.item.farmer} · ₹{entry.item.price.toFixed(2)}/
-                    {entry.item.unit}
+                    {item.farmerName} · ₹{item.price.toFixed(2)}/
+                    {item.unit}
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <button
                         onClick={() =>
-                          entry.qty <= 1
-                            ? onRemove(entry.item.id)
-                            : onUpdateQty(entry.item.id, entry.qty - 1)
+                          item.quantity <= 1
+                            ? onRemove(item.id)
+                            : onUpdateQty(item.id, item.quantity - 1)
                         }
                         className="w-6 h-6 rounded-lg flex items-center justify-center transition-colors"
                         style={{
@@ -266,8 +293,8 @@ function CartDrawer({
                           background: 'var(--fd-surface)',
                         }}
                       >
-                        {entry.qty <= 1 ? (
-                          <Trash2 className="w-3 h-3 text-red-500" />
+                        {item.quantity <= 1 ? (
+                          <Trash2 className="w-3 h-3" style={{ color: C.red }} />
                         ) : (
                           <Minus className="w-3 h-3" />
                         )}
@@ -279,13 +306,13 @@ function CartDrawer({
                           color: 'var(--fd-text)',
                         }}
                       >
-                        {entry.qty}
+                        {item.quantity}
                       </span>
                       <button
                         onClick={() =>
                           onUpdateQty(
-                            entry.item.id,
-                            Math.min(entry.item.inStock, entry.qty + 1),
+                            item.id,
+                            item.quantity + 1,
                           )
                         }
                         className="w-6 h-6 rounded-lg flex items-center justify-center transition-colors"
@@ -300,12 +327,12 @@ function CartDrawer({
                     </div>
                     <span
                       className="text-sm font-bold"
-                      style={{
-                        fontFamily: "'Playfair Display', serif",
-                        color: '#d97706',
-                      }}
+                        style={{
+                          fontFamily: "'Playfair Display', serif",
+                          color: C.amber,
+                        }}
                     >
-                      ₹{(entry.item.price * entry.qty).toFixed(2)}
+                      ₹{(item.price * item.quantity).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -353,7 +380,7 @@ function CartDrawer({
                 </span>
                 <span
                   style={{
-                    color: '#d97706',
+                    color: C.amber,
                     fontFamily: "'DM Sans', sans-serif",
                   }}
                 >
@@ -378,7 +405,7 @@ function CartDrawer({
                   className="text-base font-bold"
                   style={{
                     fontFamily: "'Playfair Display', serif",
-                    color: '#16a34a',
+                    color: C.green,
                   }}
                 >
                   ₹{total.toFixed(2)}
@@ -388,7 +415,7 @@ function CartDrawer({
             <button
               className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold hover:shadow-lg transition-all"
               style={{
-                background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+                background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`,
                 color: '#ffffff',
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -410,8 +437,8 @@ export function MarketGrid() {
   const [viewMode, setViewMode] = useState<ViewMode>('card')
   const [favourites, setFavourites] = useState<Set<string>>(new Set())
   const [compareList, setCompareList] = useState<Set<string>>(new Set())
-  const [cartItems, setCartItems] = useState<CartEntry[]>([])
   const [showCart, setShowCart] = useState(false)
+  const { items: cartItems, addToCart, updateQuantity, removeFromCart, itemCount: totalCartQty } = useCart()
 
   const { data: wishlistData = [] } = useQuery({
     queryKey: ['buyerWishlist'],
@@ -425,7 +452,6 @@ export function MarketGrid() {
     }
   }, [wishlistData])
 
-  const totalCartQty = cartItems.reduce((s, e) => s + e.qty, 0)
 
   const queryClient = useQueryClient()
   const toggleWishlist = useMutation({
@@ -452,25 +478,54 @@ export function MarketGrid() {
       return n
     })
 
-  const handleAddToCart = (item: ProduceItem, qty: number) =>
-    setCartItems((prev) => {
-      const ex = prev.find((e) => e.item.id === item.id)
-      return ex
-        ? prev.map((e) =>
-            e.item.id === item.id
-              ? { ...e, qty: Math.min(item.inStock, e.qty + qty) }
-              : e,
-          )
-        : [...prev, { item, qty }]
+  const handleAddToCart = (item: ProduceItem, qty: number) => {
+    for (let i = 0; i < qty; i++) {
+      addToCart({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        emoji: item.practiceIcon,
+        imageUrl: item.image,
+        farmerId: '', // Ideally we have this
+        farmerName: item.farmer,
+        unit: item.unit
+      })
+    }
+  }
+
+  const handleUpdateCartQty = (id: string, qty: number) => {
+    // Delta needed for updateQuantity
+    const item = cartItems.find(i => i.id === id)
+    if (item) {
+      updateQuantity(id, qty - item.quantity)
+    }
+  }
+
+  const handleRemoveFromCart = (id: string) => removeFromCart(id)
+
+  const router = useRouter()
+  const startChatMutation = useMutation({
+    mutationFn: (data: any) => getOrCreateThreadFn({ data }),
+    onSuccess: (res: any) => {
+      toast.success('Chat initiated!')
+      router.navigate({ to: '/buyer', search: { tab: 'chat', threadId: res.id } as any })
+    },
+    onError: () => toast.error('Please sign in to chat with farmers')
+  })
+
+  const handleStartChat = (item: any) => {
+    if (!item.farmerId) {
+      toast.error('Cannot chat: Farmer information missing')
+      return
+    }
+    startChatMutation.mutate({
+      farmerId: item.farmerId,
+      listingId: item.id,
+      farmerName: item.farmer,
+      productName: item.name,
+      productEmoji: item.emoji || '📦'
     })
-
-  const handleUpdateCartQty = (id: string, qty: number) =>
-    setCartItems((prev) =>
-      prev.map((e) => (e.item.id === id ? { ...e, qty } : e)),
-    )
-
-  const handleRemoveFromCart = (id: string) =>
-    setCartItems((prev) => prev.filter((e) => e.item.id !== id))
+  }
 
   const { data: serverListings } = useQuery({
     queryKey: ['allListings'],
@@ -511,6 +566,7 @@ export function MarketGrid() {
       unit: l.priceUnit || 'item',
       image: l.imageUrl || getCategoryPlaceholder(l.category || '', l.name),
       category: l.category || 'Vegetables',
+      farmerId: l.farmerId || '',
       practice: l.practice || 'Sustainable',
       practiceIcon: l.emoji || '🌱',
       freshnessHours: 24,
@@ -592,7 +648,7 @@ export function MarketGrid() {
         className="absolute top-0 left-0 right-0 h-px"
         style={{
           background:
-            'linear-gradient(to right, transparent, var(--fd-gold), transparent)',
+            `linear-gradient(to right, transparent, ${C.amber}, transparent)`,
           opacity: 0.4,
         }}
       />
@@ -602,7 +658,7 @@ export function MarketGrid() {
         className="absolute top-0 left-0 right-0 h-64 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse at 50% 0%, rgba(16,163,74,0.04) 0%, transparent 70%)',
+            `radial-gradient(ellipse at 50% 0%, color-mix(in srgb, ${C.green}, transparent 96%) 0%, transparent 70%)`,
         }}
       />
 
@@ -616,9 +672,9 @@ export function MarketGrid() {
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase mb-4"
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              border: '1px solid rgba(16,163,74,0.25)',
-              background: '#dcfce7',
-              color: '#14532d',
+              border: `1px solid color-mix(in srgb, ${C.green}, transparent 75%)`,
+              background: C.greenGlow,
+              color: C.green,
             }}
           >
             🌾 Live Marketplace
@@ -664,7 +720,7 @@ export function MarketGrid() {
           <div className="relative flex-1">
             <Search
               className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4"
-              style={{ color: '#16a34a' }}
+              style={{ color: C.green }}
             />
             <input
               type="text"
@@ -695,7 +751,7 @@ export function MarketGrid() {
               >
                 <SlidersHorizontal
                   className="w-4 h-4 shrink-0"
-                  style={{ color: '#16a34a' }}
+                  style={{ color: C.green }}
                 />
                 <span className="truncate text-left">{sortBy}</span>
                 <ChevronDown
@@ -712,7 +768,7 @@ export function MarketGrid() {
                     style={{
                       background: 'var(--fd-modal-bg)',
                       border: '1px solid var(--fd-border)',
-                      boxShadow: '0 8px 32px rgba(16,163,74,0.12)',
+                      boxShadow: `0 8px 32px color-mix(in srgb, ${C.green}, transparent 88%)`,
                     }}
                   >
                     {SORT_OPTIONS.map((opt) => (
@@ -726,10 +782,10 @@ export function MarketGrid() {
                         style={{
                           fontFamily: "'DM Sans', sans-serif",
                           color:
-                            sortBy === opt ? '#d97706' : 'var(--fd-text-2)',
+                            sortBy === opt ? C.amber : 'var(--fd-text-2)',
                           background:
                             sortBy === opt
-                              ? 'rgba(217,119,6,0.06)'
+                              ? `color-mix(in srgb, ${C.amber}, transparent 94%)`
                               : 'transparent',
                         }}
                       >
@@ -749,7 +805,7 @@ export function MarketGrid() {
               style={{
                 background:
                   totalCartQty > 0
-                    ? 'linear-gradient(135deg,#d97706,#f59e0b)'
+                    ? `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`
                     : 'var(--fd-input-bg)',
                 border:
                   totalCartQty > 0
@@ -954,11 +1010,12 @@ export function MarketGrid() {
                   isInCompare={compareList.has(item.id)}
                   compareMode={false}
                   cartQty={
-                    cartItems.find((e) => e.item.id === item.id)?.qty ?? 0
+                    cartItems.find((e) => e.id === item.id)?.quantity ?? 0
                   }
                   onToggleFavourite={() => handleToggleFavourite(item.id)}
                   onToggleCompare={() => handleToggleCompare(item.id)}
                   onAddToCart={(qty) => handleAddToCart(item, qty)}
+                  onChat={() => handleStartChat(item)}
                 />
               ))}
             </motion.div>

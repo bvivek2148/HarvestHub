@@ -307,7 +307,7 @@ export function RoleAvatarCard({ user }: Props) {
   }
 
   const displayName = user.name || user.email?.split('@')[0] || 'Guest'
-  const initials = displayName
+  const initials = String(displayName || 'Guest')
     .split(' ')
     .map((w: string) => w[0])
     .join('')

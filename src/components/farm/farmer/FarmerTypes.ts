@@ -33,8 +33,8 @@ export interface Order {
   id: string
   buyer: string
   product: string
-  qty: string
-  total: string
+  qty: string | number
+  total: string | number
   status: OrderStatus
   date: string
   emoji: string
@@ -64,23 +64,26 @@ export interface Notification {
 
 // Design tokens
 export const C = {
-  bg: '#050e05',
-  navBg: '#070e07',
-  surface: '#0b180b',
-  surface2: '#0f1f0f',
-  surface3: '#131f13',
-  border: 'rgba(38,70,38,0.5)',
-  border2: 'rgba(55,95,55,0.35)',
-  text: '#eef5ee',
-  muted: '#688568',
-  green: '#4ade80',
-  green2: '#22c55e',
-  gold: '#f0b429',
-  amber: '#f59e0b',
-  blue: '#60a5fa',
-  purple: '#a78bfa',
-  red: '#f87171',
+  bg: 'var(--fd-bg)',
+  navBg: 'var(--fd-nav-bg)',
+  surface: 'var(--fd-surface)',
+  surface2: 'var(--fd-surface-2)',
+  surface3: 'var(--fd-bg-3)',
+  border: 'var(--fd-border)',
+  border2: 'var(--fd-border-mid)',
+  text: 'var(--fd-text)',
+  muted: 'var(--fd-text-muted)',
+  green: 'var(--fd-green)',
+  greenLight: 'var(--fd-green-light)',
+  greenDark: 'var(--fd-green-dark)',
+  gold: 'var(--fd-gold)',
+  amber: 'var(--fd-gold-light)',
+  blue: 'var(--fd-blue)',
+  purple: 'var(--fd-purple)',
+  red: 'var(--fd-red)',
   teal: '#2dd4bf',
+  hover: 'var(--fd-hover-bg)',
+  active: 'var(--fd-active-bg)',
 } as const
 
 export const ORDER_STATUS: Record<
@@ -88,32 +91,32 @@ export const ORDER_STATUS: Record<
   { color: string; bg: string; label: string; icon: string }
 > = {
   pending: {
-    color: '#fbbf24',
-    bg: 'rgba(251,191,36,0.12)',
+    color: 'var(--fd-gold)',
+    bg: 'var(--fd-gold-bg)',
     label: 'Pending',
     icon: '⏳',
   },
   confirmed: {
-    color: '#60a5fa',
-    bg: 'rgba(96,165,250,0.12)',
+    color: 'var(--fd-blue)',
+    bg: 'var(--fd-blue-bg)',
     label: 'Confirmed',
     icon: '✅',
   },
   dispatched: {
-    color: '#a78bfa',
-    bg: 'rgba(167,139,250,0.12)',
+    color: 'var(--fd-purple)',
+    bg: 'var(--fd-purple-bg)',
     label: 'Dispatched',
     icon: '🚚',
   },
   delivered: {
-    color: '#4ade80',
-    bg: 'rgba(74,222,128,0.12)',
+    color: 'var(--fd-green)',
+    bg: 'var(--fd-green-bg)',
     label: 'Delivered',
     icon: '📦',
   },
   cancelled: {
-    color: '#f87171',
-    bg: 'rgba(248,113,113,0.12)',
+    color: 'var(--fd-red)',
+    bg: 'var(--fd-red-bg)',
     label: 'Cancelled',
     icon: '❌',
   },
@@ -123,14 +126,26 @@ export const LISTING_STATUS: Record<
   ListingStatus,
   { color: string; bg: string; label: string }
 > = {
-  active: { color: '#4ade80', bg: 'rgba(74,222,128,0.12)', label: 'Active' },
-  low: { color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', label: 'Low Stock' },
+  active: {
+    color: 'var(--fd-green)',
+    bg: 'var(--fd-green-bg)',
+    label: 'Active',
+  },
+  low: {
+    color: 'var(--fd-gold)',
+    bg: 'var(--fd-gold-bg)',
+    label: 'Low Stock',
+  },
   sold_out: {
-    color: '#f87171',
-    bg: 'rgba(248,113,113,0.12)',
+    color: 'var(--fd-red)',
+    bg: 'var(--fd-red-bg)',
     label: 'Sold Out',
   },
-  paused: { color: '#94a3b8', bg: 'rgba(148,163,184,0.12)', label: 'Paused' },
+  paused: {
+    color: 'var(--fd-text-muted)',
+    bg: 'var(--fd-hover-bg)',
+    label: 'Paused',
+  },
 }
 
 
@@ -149,7 +164,7 @@ export const getRevenueTrend = (orders: Order[]) => {
     const d = new Date(o.date)
     const m = months[d.getMonth()]
     if (trend[m] !== undefined) {
-      trend[m] += parseFloat(o.total.replace(/[₹]/, ''))
+      trend[m] += parseFloat(String(o.total).replace(/[₹]/, '') || '0')
     }
   })
 

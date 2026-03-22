@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { db } from '@/lib/firebase'
-import { collection, query, where, onSnapshot, orderBy, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore'
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore'
 import { useAuth } from '@/hooks/use-auth'
+import { sendMessageFn, markThreadAsReadFn } from '@/server/functions/messages'
+import { toast } from 'sonner'
 
 export interface ChatThread {
   id: string
@@ -21,7 +23,7 @@ export interface ChatMessage {
   id: string
   senderId: string
   senderName: string
-  text: string
+  content: string
   createdAt: any
 }
 
@@ -61,6 +63,9 @@ export function useChatThreads() {
           setLoading(false)
         }, (error) => {
           console.error("Chat threads error:", error)
+          if (error.code === 'permission-denied') {
+            toast.error("Dashboard: Chat loading blocked by Firestore permissions. Please check your Firebase Console rules.")
+          }
           setLoading(false)
         })
       } else {
@@ -106,11 +111,9 @@ export function useChatMessages(threadId: string | null) {
           setMessages(docs)
         })
 
-        // Reset unread count for current user when opening thread
-        const ref = doc(db, 'threads', threadId)
-        updateDoc(ref, {
-          [`unreadCount.${currentUser.id}`]: 0
-        }).catch(err => console.error("Failed to reset unread", err))
+        // Reset unread count for current user when opening thread via server
+        ;(markThreadAsReadFn as any)({ data: { threadId } })
+          .catch((err: any) => console.error("Failed to reset unread via server", err))
 
       } else {
         if (unsubscribeSnapshot) {
@@ -127,29 +130,12 @@ export function useChatMessages(threadId: string | null) {
     }
   }, [threadId, currentUser?.id])
 
-  const sendMessage = async (text: string, otherUserId: string) => {
-    if (!threadId || !currentUser?.id || !text.trim()) return
-
-    const messageData = {
-      senderId: currentUser.id,
-      senderName: currentUser.name || 'Member',
-      text: text.trim(),
-      createdAt: serverTimestamp()
-    }
-
+  const sendMessage = async (content: string, _otherUserId: string) => {
+    if (!threadId || !currentUser?.id || !content.trim()) return
     try {
-      // Add message
-      await addDoc(collection(db, 'threads', threadId, 'messages'), messageData)
-
-      // Update thread
-      const threadRef = doc(db, 'threads', threadId)
-      await updateDoc(threadRef, {
-        lastMessage: text.trim(),
-        updatedAt: serverTimestamp(),
-        [`unreadCount.${otherUserId}`]: increment(1)
-      })
+      await (sendMessageFn as any)({ data: { threadId, content: content.trim() } })
     } catch (err) {
-      console.error('Failed to send message', err)
+      console.error('Failed to send message via server', err)
     }
   }
 

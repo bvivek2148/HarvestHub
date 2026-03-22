@@ -119,7 +119,7 @@ interface Props {
 export function FarmerAnalyticsTab({ listings, orders }: Props) {
   const totalRevenue = orders
     .filter((o) => o.status === 'delivered')
-    .reduce((s, o) => s + parseFloat(o.total.replace(/[₹$]/, '')), 0)
+    .reduce((s, o) => s + parseFloat(String(o.total).replace(/[₹$]/, '')), 0)
   const totalViews = listings.reduce((s, l) => s + (l.views ?? 0), 0)
   const totalOrders = orders.length
   const convRate =

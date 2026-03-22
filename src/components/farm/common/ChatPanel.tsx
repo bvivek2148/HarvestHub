@@ -87,7 +87,7 @@ export function ChatPanel({ thread, currentUserId, onClose }: Props) {
                 borderBottomLeftRadius: !isMe ? 4 : undefined,
               }}
             >
-              {m.text}
+              {m.content || (m as any).text}
               <div className="text-[10px] opacity-50 mt-1">
                 {m.createdAt?.toDate ? m.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
               </div>

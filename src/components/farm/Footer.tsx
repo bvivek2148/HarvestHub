@@ -54,29 +54,30 @@ export function Footer() {
     <footer
       className="pt-12 sm:pt-16 pb-6 sm:pb-8 relative overflow-hidden"
       style={{
-        background: '#14532d',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--fd-footer-bg)',
+        borderTop: '1px solid var(--fd-footer-border)',
       }}
     >
       <div
         className="absolute top-0 left-0 right-0 h-px"
         style={{
           background:
-            'linear-gradient(to right, transparent, rgba(217,119,6,0.5), transparent)',
+            `linear-gradient(to right, transparent, var(--fd-footer-accent), transparent)`,
+          opacity: 0.4,
         }}
       />
       <div
         className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-48 pointer-events-none"
         style={{
           background:
-            'radial-gradient(ellipse, rgba(217,119,6,0.08) 0%, transparent 70%)',
+            'radial-gradient(ellipse, color-mix(in srgb, var(--fd-footer-accent), transparent 92%) 0%, transparent 70%)',
         }}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 pb-10 sm:pb-12"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+          style={{ borderBottom: '1px solid var(--fd-footer-border)' }}
         >
           {/* Brand */}
           <div className="col-span-2">
@@ -85,23 +86,23 @@ export function Footer() {
                 <div
                   className="absolute inset-0 rounded-full"
                   style={{
-                    background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+                    background: `linear-gradient(135deg, var(--fd-footer-accent), color-mix(in srgb, var(--fd-footer-accent), #000 20%))`,
                   }}
                 />
                 <Sprout className="absolute inset-0 m-auto w-4 h-4 text-white" />
               </div>
               <span
-                className="text-base sm:text-lg font-bold text-white"
-                style={{ fontFamily: "'Playfair Display', serif" }}
+                className="text-base sm:text-lg font-bold"
+                style={{ fontFamily: "'Playfair Display', serif", color: 'var(--fd-footer-heading)' }}
               >
-                Harvest<span style={{ color: '#f59e0b' }}>Hub</span>
+                HarvestHub
               </span>
             </div>
             <p
               className="text-xs mb-5 leading-relaxed max-w-xs"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
-                color: 'rgba(255,255,255,0.5)',
+                color: 'var(--fd-footer-text)',
               }}
             >
               Connecting farmers with communities. Every purchase supports local
@@ -114,9 +115,9 @@ export function Footer() {
                   whileHover={{ scale: 1.15, y: -2 }}
                   className="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
                   style={{
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                    color: 'rgba(255,255,255,0.5)',
+                    background: 'var(--fd-footer-icon-bg)',
+                    border: '1px solid var(--fd-footer-border)',
+                    color: 'var(--fd-footer-text)',
                   }}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -132,7 +133,7 @@ export function Footer() {
                 className="text-xs font-bold uppercase tracking-widest mb-3 sm:mb-4"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  color: '#f59e0b',
+                  color: 'var(--fd-footer-accent)',
                 }}
               >
                 {heading}
@@ -145,7 +146,7 @@ export function Footer() {
                       className="text-xs transition-colors duration-200 hover:text-white"
                       style={{
                         fontFamily: "'DM Sans', sans-serif",
-                        color: 'rgba(255,255,255,0.45)',
+                        color: 'var(--fd-footer-text)',
                       }}
                     >
                       {link}
@@ -160,25 +161,26 @@ export function Footer() {
         {/* Contact */}
         <div
           className="py-6 sm:py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+          style={{ borderBottom: '1px solid var(--fd-footer-border)' }}
         >
           {CONTACT.map(({ Icon, label, value }) => (
             <div key={label} className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                 style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.15)',
+                  background: 'var(--fd-footer-icon-bg)',
+                  border: '1px solid var(--fd-footer-border)',
                 }}
               >
-                <Icon className="w-3.5 h-3.5" style={{ color: '#f59e0b' }} />
+                <Icon className="w-3.5 h-3.5" style={{ color: 'var(--fd-footer-accent)' }} />
               </div>
               <div>
                 <div
                   className="text-[10px] uppercase tracking-wider mb-0.5"
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    color: 'rgba(255,255,255,0.35)',
+                    color: 'var(--fd-footer-text)',
+                    opacity: 0.6,
                   }}
                 >
                   {label}
@@ -187,7 +189,7 @@ export function Footer() {
                   className="text-xs"
                   style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    color: 'rgba(255,255,255,0.65)',
+                    color: 'var(--fd-footer-text)',
                   }}
                 >
                   {value}
@@ -200,7 +202,7 @@ export function Footer() {
         {/* Trust badges */}
         <div
           className="py-5 sm:py-6 flex flex-wrap gap-2 sm:gap-4 items-center justify-center"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}
+          style={{ borderBottom: '1px solid var(--fd-footer-border)' }}
         >
           {BADGES.map((badge) => (
             <span
@@ -208,9 +210,9 @@ export function Footer() {
               className="text-[10px] sm:text-xs px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full"
               style={{
                 fontFamily: "'DM Sans', sans-serif",
-                color: 'rgba(255,255,255,0.45)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.05)',
+                color: 'var(--fd-footer-text)',
+                border: '1px solid var(--fd-footer-border)',
+                background: 'var(--fd-footer-icon-bg)',
               }}
             >
               {badge.icon} {badge.label}
@@ -224,7 +226,8 @@ export function Footer() {
             className="text-[10px]"
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              color: 'rgba(255,255,255,0.3)',
+              color: 'var(--fd-footer-text)',
+              opacity: 0.4,
             }}
           >
             © {new Date().getFullYear()} HarvestHub Marketplace Inc. All rights
@@ -234,7 +237,8 @@ export function Footer() {
             className="text-[10px]"
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              color: 'rgba(255,255,255,0.3)',
+              color: 'var(--fd-footer-text)',
+              opacity: 0.4,
             }}
           >
             Built with 🌾 for farmers everywhere · 5% flat commission · Zero

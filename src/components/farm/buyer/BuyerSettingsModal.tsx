@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Link } from '@tanstack/react-router'
-import { X, Bell, Moon, Globe, Shield, Mail } from 'lucide-react'
+import { X, Bell, Moon, Globe, Shield, Mail, Loader2 } from 'lucide-react'
 import { C } from './BuyerTypes'
 import { toast } from 'sonner'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { updateUserProfileFn } from '@/server/functions/users'
 
 interface Props {
   onClose: () => void
@@ -58,7 +60,49 @@ export function BuyerSettingsModal({
   onSignOut,
   ordersCount,
   savedCount,
+  profile,
 }: Props) {
+  const [activeTab, setActiveTab] = useState<'settings' | 'profile'>('settings')
+  
+  const [fullName, setFullName] = useState(profile?.fullName || profile?.name || displayName)
+  const [bio, setBio] = useState(profile?.bio || '')
+  const [phone, setPhone] = useState(profile?.phone || '')
+  const [altPhone, setAltPhone] = useState(profile?.altPhone || '')
+  const [address, setAddress] = useState(profile?.address || '')
+  const [city, setCity] = useState(profile?.city || '')
+  const [state, setState] = useState(profile?.state || '')
+  const [pincode, setPincode] = useState(profile?.pincode || '')
+  const [language, setLanguage] = useState(profile?.language || 'English')
+  const [deliveryPref, setDeliveryPref] = useState(profile?.deliveryPref || 'Morning')
+  const [interests, setInterests] = useState(profile?.interests || '')
+
+  const queryClient = useQueryClient()
+  const updateMutation = useMutation({
+    mutationFn: (data: any) => updateUserProfileFn({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] })
+      toast.success('Profile updated successfully!')
+      setActiveTab('settings')
+    },
+    onError: () => toast.error('Failed to update profile')
+  })
+
+  const handleSave = () => {
+    updateMutation.mutate({ 
+      fullName, 
+      bio, 
+      phone, 
+      altPhone, 
+      address, 
+      city, 
+      state, 
+      pincode, 
+      language,
+      deliveryPref,
+      interests
+    })
+  }
+
   const [settings, setSettings] = useState<Record<string, boolean>>({
     orderNotifs: true,
     promoAlerts: false,
@@ -108,128 +152,318 @@ export function BuyerSettingsModal({
             <X className="w-5 h-5" />
           </button>
         </div>
+        <div
+          className="flex items-center gap-4 px-6 py-2"
+          style={{ borderBottom: `1px solid ${C.border}` }}
+        >
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="text-xs font-bold py-3 px-1 transition-all border-b-2"
+            style={{ 
+              color: activeTab === 'settings' ? C.green : C.muted,
+              borderColor: activeTab === 'settings' ? C.green : 'transparent'
+            }}
+          >
+            Settings
+          </button>
+          <button
+            onClick={() => setActiveTab('profile')}
+            className="text-xs font-bold py-3 px-1 transition-all border-b-2"
+            style={{ 
+              color: activeTab === 'profile' ? C.green : C.muted,
+              borderColor: activeTab === 'profile' ? C.green : 'transparent'
+            }}
+          >
+            Edit Profile
+          </button>
+        </div>
 
         <div className="p-6 space-y-5 max-h-[80vh] overflow-y-auto">
-          {/* Profile */}
-          <div
-            className="flex items-center gap-4 p-4 rounded-2xl"
-            style={{ background: C.surface2, border: `1px solid ${C.border}` }}
-          >
-            <div
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold shrink-0"
-              style={{
-                background:
-                  'linear-gradient(135deg, rgba(74,222,128,0.25), rgba(74,222,128,0.08))',
-                color: C.green,
-                border: '2px solid rgba(74,222,128,0.35)',
-                fontFamily: "'Syne', sans-serif",
-              }}
-            >
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
+          {activeTab === 'settings' ? (
+            <>
+              {/* Profile Bar */}
               <div
-                className="text-sm font-bold truncate"
-                style={{ color: C.text }}
-              >
-                {displayName}
-              </div>
-              <div
-                className="text-xs mt-0.5 truncate"
-                style={{ color: C.muted }}
-              >
-                {email}
-              </div>
-              <div
-                className="text-xs mt-1 font-semibold"
-                style={{ color: C.green }}
-              >
-                🛒 Buyer Account
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Orders', value: ordersCount.toString(), color: C.blue },
-              { label: 'Saved', value: savedCount.toString(), color: C.red },
-              { label: 'Reviews', value: '0', color: C.gold },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="rounded-xl p-3 text-center"
-                style={{
-                  background: C.surface,
-                  border: `1px solid ${C.border}`,
-                }}
+                className="flex items-center gap-4 p-4 rounded-2xl"
+                style={{ background: C.surface2, border: `1px solid ${C.border}` }}
               >
                 <div
-                  className="text-lg font-bold"
-                  style={{ color: s.color, fontFamily: "'Syne', sans-serif" }}
-                >
-                  {s.value}
-                </div>
-                <div className="text-[10px] mt-0.5" style={{ color: C.muted }}>
-                  {s.label}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Toggle Settings */}
-          <div
-            className="rounded-2xl overflow-hidden"
-            style={{ border: `1px solid ${C.border}` }}
-          >
-            {TOGGLES.map((t, i) => (
-              <div
-                key={t.key}
-                className="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-white/[0.02] transition-colors"
-                style={{
-                  borderBottom:
-                    i < TOGGLES.length - 1 ? `1px solid ${C.border}` : 'none',
-                }}
-                onClick={() => toggle(t.key)}
-              >
-                <div
-                  className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold shrink-0"
                   style={{
-                    background: 'rgba(74,222,128,0.08)',
+                    background:
+                      'linear-gradient(135deg, rgba(74,222,128,0.25), rgba(74,222,128,0.08))',
                     color: C.green,
+                    border: '2px solid rgba(74,222,128,0.35)',
+                    fontFamily: "'Syne', sans-serif",
                   }}
                 >
-                  {t.icon}
+                  {initials}
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <div
-                    className="text-sm font-semibold"
+                    className="text-sm font-bold truncate"
                     style={{ color: C.text }}
                   >
-                    {t.label}
+                    {displayName}
                   </div>
-                  <div className="text-xs" style={{ color: C.muted }}>
-                    {t.desc}
+                  <div
+                    className="text-xs mt-0.5 truncate"
+                    style={{ color: C.muted }}
+                  >
+                    {email}
+                  </div>
+                  <div
+                    className="text-xs mt-1 font-semibold"
+                    style={{ color: C.green }}
+                  >
+                    🛒 Buyer Account
                   </div>
                 </div>
-                <div
-                  className="w-10 h-6 rounded-full relative shrink-0 transition-all duration-300"
-                  style={{
-                    background: settings[t.key]
-                      ? 'linear-gradient(90deg, #4ade80, #22c55e)'
-                      : 'rgba(255,255,255,0.08)',
-                  }}
-                >
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Orders', value: ordersCount.toString(), color: C.blue },
+                  { label: 'Saved', value: savedCount.toString(), color: C.red },
+                  { label: 'Reviews', value: '0', color: C.gold },
+                ].map((s) => (
                   <div
-                    className="absolute top-0.5 w-5 h-5 rounded-full shadow transition-all duration-300"
+                    key={s.label}
+                    className="rounded-xl p-3 text-center"
                     style={{
-                      left: settings[t.key] ? '1.25rem' : '0.125rem',
-                      background: '#fff',
+                      background: C.surface,
+                      border: `1px solid ${C.border}`,
                     }}
+                  >
+                    <div
+                      className="text-lg font-bold"
+                      style={{ color: s.color, fontFamily: "'Syne', sans-serif" }}
+                    >
+                      {s.value}
+                    </div>
+                    <div className="text-[10px] mt-0.5" style={{ color: C.muted }}>
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Toggle Settings */}
+              <div
+                className="rounded-2xl overflow-hidden"
+                style={{ border: `1px solid ${C.border}` }}
+              >
+                {TOGGLES.map((t, i) => (
+                  <div
+                    key={t.key}
+                    className="flex items-center gap-3 px-4 py-3.5 cursor-pointer hover:bg-white/[0.02] transition-colors"
+                    style={{
+                      borderBottom:
+                        i < TOGGLES.length - 1 ? `1px solid ${C.border}` : 'none',
+                    }}
+                    onClick={() => toggle(t.key)}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                      style={{
+                        background: 'rgba(74,222,128,0.08)',
+                        color: C.green,
+                      }}
+                    >
+                      {t.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div
+                        className="text-sm font-semibold"
+                        style={{ color: C.text }}
+                      >
+                        {t.label}
+                      </div>
+                      <div className="text-xs" style={{ color: C.muted }}>
+                        {t.desc}
+                      </div>
+                    </div>
+                    <div
+                      className="w-10 h-6 rounded-full relative shrink-0 transition-all duration-300"
+                      style={{
+                        background: settings[t.key]
+                          ? 'linear-gradient(90deg, #4ade80, #22c55e)'
+                          : 'rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div
+                        className="absolute top-0.5 w-5 h-5 rounded-full shadow transition-all duration-300"
+                        style={{
+                          left: settings[t.key] ? '1.25rem' : '0.125rem',
+                          background: '#fff',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] px-1" style={{ color: C.green }}>Basic Information</h4>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Full Name</label>
+                    <input
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      placeholder="Your full name"
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Bio</label>
+                    <textarea
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Tell farmers about yourself..."
+                      className="w-full px-4 py-3 rounded-2xl text-sm h-20 outline-none resize-none transition-all focus:ring-1 focus:ring-green-500/30"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] px-1" style={{ color: C.green }}>Contact & Language</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Primary Phone</label>
+                    <input
+                      type="text"
+                      value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+91..."
+                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                    style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                  />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Alt Phone</label>
+                    <input
+                      type="text"
+                      value={altPhone}
+                    onChange={(e) => setAltPhone(e.target.value)}
+                    placeholder="Secondary"
+                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                    style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                  />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Preferred Language</label>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30 appearance-none bg-no-repeat bg-[right_1rem_center]"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.3)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1rem' }}
+                    >
+                      <option value="English">English</option>
+                      <option value="Hindi">Hindi</option>
+                      <option value="Telugu">Telugu</option>
+                      <option value="Tamil">Tamil</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Delivery Time</label>
+                    <select
+                      value={deliveryPref}
+                      onChange={(e) => setDeliveryPref(e.target.value)}
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30 appearance-none bg-no-repeat bg-[right_1rem_center]"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='rgba(255,255,255,0.3)'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1rem' }}
+                    >
+                      <option value="Morning">Morning (7-11 AM)</option>
+                      <option value="Afternoon">Afternoon (1-4 PM)</option>
+                      <option value="Evening">Evening (5-9 PM)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Produce Interests</label>
+                  <input
+                    type="text"
+                    value={interests}
+                    onChange={(e) => setInterests(e.target.value)}
+                    placeholder="e.g. Organic, Fruits, Leafy Greens"
+                    className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                    style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
                   />
                 </div>
               </div>
-            ))}
-          </div>
+
+              <div className="space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] px-1" style={{ color: C.green }}>Shipping Address</h4>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Street / Area</label>
+                    <input
+                      type="text"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      placeholder="House No, Street, Locality"
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>City</label>
+                      <input
+                        type="text"
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        placeholder="City"
+                        className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                        style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>Pincode</label>
+                      <input
+                        type="text"
+                        value={pincode}
+                        onChange={(e) => setPincode(e.target.value)}
+                        placeholder="6-digit ZIP"
+                        className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                        style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: C.muted }}>State</label>
+                    <input
+                      type="text"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      placeholder="State"
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all focus:ring-1 focus:ring-green-500/30"
+                      style={{ background: C.surface, border: `1px solid ${C.border}`, color: C.text }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSave}
+                disabled={updateMutation.isPending}
+                className="w-full py-4 rounded-2xl flex items-center justify-center gap-3 font-bold text-sm transition-all hover:scale-[1.02] disabled:opacity-50"
+                style={{
+                  background: 'linear-gradient(135deg, #4ade80, #16a34a)',
+                  color: '#051005'
+                }}
+              >
+                {updateMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Profile Changes'}
+              </button>
+            </div>
+          )}
 
           {/* Actions */}
           <Link

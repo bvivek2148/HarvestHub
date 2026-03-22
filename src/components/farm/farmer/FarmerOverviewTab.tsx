@@ -8,6 +8,7 @@ import {
   ChevronRight,
   AlertTriangle,
   BarChart3,
+  MessageSquare,
   Zap,
   Users,
 } from 'lucide-react'
@@ -60,19 +61,21 @@ function StatCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.4 }}
-      whileHover={{ scale: 1.02, y: -2 }}
-      className="rounded-2xl p-5 relative overflow-hidden group cursor-default"
-      style={{ background: C.surface, border: `1px solid ${C.border}` }}
+      className="fd-card-premium rounded-2xl p-5 relative overflow-hidden group cursor-default"
+      style={{ border: `1px solid ${C.border}` }}
     >
       <div
         className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          background: `radial-gradient(circle at 80% 20%, ${color}0a, transparent 60%)`,
+          background: `radial-gradient(circle at 80% 20%, color-mix(in srgb, ${color}, transparent 96%), transparent 60%)`,
         }}
       />
       <div
         className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-        style={{ background: color + '18', color }}
+        style={{ 
+          background: `color-mix(in srgb, ${color}, transparent 90%)`, 
+          color 
+        }}
       >
         {icon}
       </div>
@@ -123,12 +126,13 @@ export function FarmerOverviewTab({
   displayName,
   listings,
   orders,
+  messages,
   onTabChange,
   onAddListing,
 }: Props) {
   const revenue = orders
     .filter((o) => o.status === 'delivered')
-    .reduce((s, o) => s + parseFloat(o.total.replace(/[₹$]/, '')), 0)
+    .reduce((s, o) => s + parseFloat(String(o.total).replace(/[₹$]/, '')), 0)
   const pendingOrders = orders.filter((o) => o.status === 'pending').length
   const activeListings = listings.filter((l) => l.status === 'active').length
   const totalViews = listings.reduce((s, l) => s + (l.views ?? 0), 0)
@@ -179,9 +183,9 @@ export function FarmerOverviewTab({
         transition={{ duration: 0.5 }}
         className="rounded-2xl p-6 sm:p-8 relative overflow-hidden"
         style={{
-          background:
-            'linear-gradient(135deg, #061a0c 0%, #0e3520 50%, #071a10 100%)',
-          border: '1px solid rgba(74,222,128,0.2)',
+          background: `linear-gradient(135deg, var(--fd-green-dark), var(--fd-green))`,
+          border: `1px solid color-mix(in srgb, var(--fd-green), transparent 60%)`,
+          boxShadow: `0 12px 40px color-mix(in srgb, var(--fd-green), transparent 85%)`,
         }}
       >
         <div
@@ -209,7 +213,7 @@ export function FarmerOverviewTab({
                 Farmer Dashboard
               </p>
               <h2
-                className="font-bold text-[#f5f0e8] mb-1"
+                className="font-bold text-white mb-1"
                 style={{
                   fontFamily: "'Syne', sans-serif",
                   fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
@@ -217,7 +221,7 @@ export function FarmerOverviewTab({
               >
                 Welcome back, {displayName}! 🌾
               </h2>
-              <p className="text-sm" style={{ color: C.muted }}>
+              <p className="text-sm text-white/80">
                 Manage listings, track orders, and grow your farm business.
               </p>
             </div>
@@ -296,8 +300,8 @@ export function FarmerOverviewTab({
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div
-          className="lg:col-span-2 rounded-2xl p-5"
-          style={{ background: C.surface, border: `1px solid ${C.border}` }}
+          className="lg:col-span-2 fd-card-premium rounded-2xl p-5"
+          style={{ border: `1px solid ${C.border}` }}
         >
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -352,8 +356,8 @@ export function FarmerOverviewTab({
         </div>
 
         <div
-          className="rounded-2xl p-5"
-          style={{ background: C.surface, border: `1px solid ${C.border}` }}
+          className="fd-card-premium rounded-2xl p-5"
+          style={{ border: `1px solid ${C.border}` }}
         >
           <h3
             className="text-sm font-bold mb-1"
@@ -575,7 +579,79 @@ export function FarmerOverviewTab({
         </div>
       </div>
 
-      {/* Quick Actions */}
+        {/* Recent Messages */}
+        <div
+          className="rounded-2xl p-5"
+          style={{ background: C.surface, border: `1px solid ${C.border}` }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3
+              className="text-sm font-bold"
+              style={{ color: C.text, fontFamily: "'Syne', sans-serif" }}
+            >
+              Recent Messages
+            </h3>
+            <button
+              onClick={() => onTabChange('chat')}
+              className="flex items-center gap-1 text-xs font-medium hover:underline"
+              style={{ color: C.green }}
+            >
+              Inbox <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {messages.length === 0 ? (
+              <div className="py-6 text-center" style={{ color: C.muted }}>
+                <MessageSquare className="w-6 h-6 mx-auto mb-2 opacity-10" />
+                <p className="text-[10px]">No messages yet.</p>
+              </div>
+            ) : (
+              messages.slice(0, 3).map((msg, i) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.07 }}
+                  whileHover={{ x: -2 }}
+                  onClick={() => onTabChange('chat')}
+                  className="flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200"
+                  style={{
+                    background: C.surface2,
+                    border: `1px solid ${C.border}`,
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    style={{ background: 'rgba(74,222,128,0.08)' }}
+                  >
+                    {msg.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span
+                        className="text-sm font-semibold truncate"
+                        style={{ color: C.text }}
+                      >
+                        {msg.buyer}
+                      </span>
+                      <span className="text-[10px]" style={{ color: C.muted }}>
+                        {msg.time}
+                      </span>
+                    </div>
+                    <div
+                      className="text-xs truncate"
+                      style={{ color: C.muted }}
+                    >
+                      {msg.lastMsg}
+                    </div>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           {
@@ -611,8 +687,8 @@ export function FarmerOverviewTab({
             onClick={action.onClick}
             whileHover={{ scale: 1.04, y: -2 }}
             whileTap={{ scale: 0.97 }}
-            className="rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all"
-            style={{ background: C.surface2, border: `1px solid ${C.border}` }}
+            className="fd-card-premium rounded-2xl p-4 flex flex-col items-center gap-2 text-center transition-all"
+            style={{ border: `1px solid ${C.border}` }}
           >
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center"

@@ -16,6 +16,31 @@ import { HarvestHubLogo } from './HarvestHubLogo'
 import { ThemeToggle } from './ThemeToggle'
 import { LogoLoader } from './LogoLoader'
 
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+const C = {
+  bg: 'var(--fd-bg)',
+  surface: 'var(--fd-surface)',
+  surface2: 'var(--fd-surface-2)',
+  border: 'var(--fd-border)',
+  borderGlow: 'var(--fd-border-mid)',
+  text: 'var(--fd-text)',
+  textSub: 'var(--fd-text-2)',
+  textMuted: 'var(--fd-text-muted)',
+  green: 'var(--fd-green)',
+  greenDark: 'var(--fd-green-dark)',
+  greenGlow: 'var(--fd-green-bg)',
+  amber: 'var(--fd-gold)',
+  amberGlow: 'var(--fd-gold-bg)',
+  red: 'var(--fd-red)',
+  redGlow: 'var(--fd-red-bg)',
+  blue: 'var(--fd-blue)',
+  blueGlow: 'var(--fd-blue-bg)',
+  violet: 'var(--fd-purple)',
+  violetGlow: 'var(--fd-purple-bg)',
+  hover: 'var(--fd-hover-bg)',
+  active: 'var(--fd-active-bg)',
+}
+
 function getRoleDest(labels: string[]): string {
   if (labels.includes('admin')) return '/admin'
   if (labels.includes('farmer')) return '/farmer'
@@ -26,12 +51,13 @@ function getRoleLabel(labels: string[]): {
   label: string
   emoji: string
   color: string
+  glow: string
 } {
   if (labels.includes('admin'))
-    return { label: 'Admin', emoji: '🛡️', color: '#a78bfa' }
+    return { label: 'Admin', emoji: '🛡️', color: C.violet, glow: C.violetGlow }
   if (labels.includes('farmer'))
-    return { label: 'Farmer', emoji: '🌾', color: '#16a34a' }
-  return { label: 'Buyer', emoji: '🛒', color: '#d97706' }
+    return { label: 'Farmer', emoji: '🌾', color: C.green, glow: C.greenGlow }
+  return { label: 'Buyer', emoji: '🛒', color: C.amber, glow: C.amberGlow }
 }
 
 function ProfileModal({
@@ -55,7 +81,7 @@ function ProfileModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[60] flex items-center justify-center px-4"
-      style={{ background: 'rgba(10,30,10,0.6)', backdropFilter: 'blur(8px)' }}
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <motion.div
@@ -66,24 +92,24 @@ function ProfileModal({
         className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: 'var(--fd-modal-bg)',
-          border: `1px solid ${roleInfo.color}33`,
+          border: `1px solid color-mix(in srgb, ${roleInfo.color}, transparent 80%)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
         <div
           className="px-6 py-5 flex items-start justify-between"
           style={{
-            background: `linear-gradient(135deg, ${roleInfo.color}12, ${roleInfo.color}05)`,
-            borderBottom: `1px solid ${roleInfo.color}20`,
+            background: `linear-gradient(135deg, color-mix(in srgb, ${roleInfo.color}, transparent 93%), color-mix(in srgb, ${roleInfo.color}, transparent 97%))`,
+            borderBottom: `1px solid color-mix(in srgb, ${roleInfo.color}, transparent 88%)`,
           }}
         >
           <div className="flex items-center gap-4">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shadow-lg"
               style={{
-                background: `linear-gradient(135deg, ${roleInfo.color}44, ${roleInfo.color}22)`,
+                background: `linear-gradient(135deg, color-mix(in srgb, ${roleInfo.color}, transparent 74%), color-mix(in srgb, ${roleInfo.color}, transparent 87%))`,
                 color: roleInfo.color,
-                border: `2px solid ${roleInfo.color}50`,
+                border: `2px solid color-mix(in srgb, ${roleInfo.color}, transparent 69%)`,
                 fontFamily: "'Playfair Display',serif",
               }}
             >
@@ -102,9 +128,9 @@ function ProfileModal({
               <div
                 className="text-xs mt-0.5 px-2 py-0.5 rounded-full inline-flex items-center gap-1 font-semibold"
                 style={{
-                  background: `${roleInfo.color}18`,
+                  background: `color-mix(in srgb, ${roleInfo.color}, transparent 91%)`,
                   color: roleInfo.color,
-                  border: `1px solid ${roleInfo.color}33`,
+                  border: `1px solid color-mix(in srgb, ${roleInfo.color}, transparent 80%)`,
                 }}
               >
                 {roleInfo.emoji} {roleInfo.label}
@@ -163,8 +189,8 @@ function ProfileModal({
             onClick={onClose}
             className="flex items-center gap-3 px-4 py-3 rounded-xl w-full transition-all hover:scale-[1.01]"
             style={{
-              background: `${roleInfo.color}10`,
-              border: `1px solid ${roleInfo.color}25`,
+              background: `color-mix(in srgb, ${roleInfo.color}, transparent 94%)`,
+              border: `1px solid color-mix(in srgb, ${roleInfo.color}, transparent 85%)`,
               color: roleInfo.color,
             }}
           >
@@ -239,7 +265,7 @@ export function Nav() {
   const roleDest = currentUser ? getRoleDest(currentUser.labels ?? []) : '/'
   const displayName =
     currentUser?.name || currentUser?.email?.split('@')[0] || 'User'
-  const initials = displayName
+  const initials = String(displayName || 'User')
     .split(' ')
     .map((w: string) => w[0])
     .join('')
@@ -278,7 +304,7 @@ export function Nav() {
             background: scrolled ? 'var(--fd-nav-bg)' : 'transparent',
             backdropFilter: scrolled ? 'blur(20px)' : 'none',
             borderBottom: scrolled ? '1px solid var(--fd-border)' : 'none',
-            boxShadow: scrolled ? '0 4px 24px rgba(16,163,74,0.08)' : 'none',
+            boxShadow: scrolled ? `0 4px 24px color-mix(in srgb, ${C.green}, transparent 92%)` : 'none',
           }}
         >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -305,7 +331,7 @@ export function Nav() {
               >
                 Harvest
                 <span
-                  style={{ color: scrolled ? 'var(--fd-gold)' : '#fbbf24' }}
+                  style={{ color: scrolled ? C.amber : '#fbbf24' }}
                 >
                   Hub
                 </span>
@@ -315,7 +341,7 @@ export function Nav() {
                 style={{
                   fontFamily: "'DM Sans',sans-serif",
                   color: scrolled
-                    ? 'var(--fd-green-dark)'
+                    ? C.greenDark
                     : 'rgba(255,255,255,0.7)',
                 }}
               >
@@ -341,7 +367,7 @@ export function Nav() {
                 <span
                   className="absolute -bottom-0.5 left-0 w-0 h-[2px] group-hover:w-full transition-all duration-300 rounded-full"
                   style={{
-                    background: scrolled ? 'var(--fd-gold)' : '#fbbf24',
+                    background: scrolled ? C.amber : '#fbbf24',
                   }}
                 />
               </a>
@@ -359,10 +385,10 @@ export function Nav() {
                   className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border transition-all duration-200"
                   style={{
                     borderColor: scrolled
-                      ? `${roleInfo?.color}44`
+                      ? `color-mix(in srgb, ${roleInfo?.color || C.green}, transparent 73%)`
                       : 'rgba(255,255,255,0.35)',
                     background: scrolled
-                      ? `${roleInfo?.color}0d`
+                      ? `color-mix(in srgb, ${roleInfo?.color || C.green}, transparent 95%)`
                       : 'rgba(255,255,255,0.12)',
                     backdropFilter: 'blur(10px)',
                   }}
@@ -370,9 +396,9 @@ export function Nav() {
                   <div
                     className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
                     style={{
-                      background: `linear-gradient(135deg, ${roleInfo?.color}44, ${roleInfo?.color}22)`,
-                      color: roleInfo?.color,
-                      border: `1px solid ${roleInfo?.color}50`,
+                      background: `linear-gradient(135deg, color-mix(in srgb, ${roleInfo?.color || C.green}, transparent 73%), color-mix(in srgb, ${roleInfo?.color || C.green}, transparent 87%))`,
+                      color: roleInfo?.color || C.green,
+                      border: `1px solid color-mix(in srgb, ${roleInfo?.color || C.green}, transparent 69%)`,
                       fontFamily: "'Playfair Display',serif",
                     }}
                   >
@@ -412,7 +438,7 @@ export function Nav() {
                       style={{
                         background: 'var(--fd-modal-bg)',
                         border: '1px solid var(--fd-border)',
-                        boxShadow: '0 8px 40px rgba(16,163,74,0.12)',
+                        boxShadow: `0 8px 40px color-mix(in srgb, ${C.green}, transparent 92%)`,
                       }}
                     >
                       <div
@@ -487,9 +513,9 @@ export function Nav() {
                   className="text-sm font-semibold border px-4 py-1.5 rounded-full transition-all duration-200"
                   style={{
                     fontFamily: "'DM Sans',sans-serif",
-                    color: scrolled ? 'var(--fd-green)' : '#ffffff',
+                    color: scrolled ? C.green : '#ffffff',
                     borderColor: scrolled
-                      ? 'color-mix(in srgb, var(--fd-green) 40%, transparent)'
+                      ? `color-mix(in srgb, ${C.green}, transparent 60%)`
                       : 'rgba(255,255,255,0.45)',
                     background: scrolled
                       ? 'transparent'
@@ -504,9 +530,9 @@ export function Nav() {
                   className="text-sm font-bold px-5 py-2 rounded-full transition-all duration-200 shadow-lg"
                   style={{
                     fontFamily: "'DM Sans',sans-serif",
-                    background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+                    background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`,
                     color: '#ffffff',
-                    boxShadow: '0 4px 14px rgba(217,119,6,0.45)',
+                    boxShadow: `0 4px 14px color-mix(in srgb, ${C.amber}, transparent 55%)`,
                   }}
                 >
                   Start Selling
@@ -560,9 +586,9 @@ export function Nav() {
                 <div
                   className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold"
                   style={{
-                    background: `linear-gradient(135deg, ${roleInfo?.color}44, ${roleInfo?.color}22)`,
+                    background: `linear-gradient(135deg, color-mix(in srgb, ${roleInfo?.color}, transparent 73%), color-mix(in srgb, ${roleInfo?.color}, transparent 87%))`,
                     color: roleInfo?.color,
-                    border: `1px solid ${roleInfo?.color}50`,
+                    border: `1px solid color-mix(in srgb, ${roleInfo?.color}, transparent 69%)`,
                     fontFamily: "'Playfair Display',serif",
                   }}
                 >
@@ -619,8 +645,8 @@ export function Nav() {
                     className="flex-1 text-sm font-medium text-center py-2.5 rounded-full border"
                     style={{
                       color: roleInfo?.color,
-                      borderColor: `${roleInfo?.color}44`,
-                      background: `${roleInfo?.color}0d`,
+                      borderColor: `color-mix(in srgb, ${roleInfo?.color}, transparent 73%)`,
+                      background: `color-mix(in srgb, ${roleInfo?.color}, transparent 95%)`,
                       fontFamily: "'DM Sans',sans-serif",
                     }}
                   >
@@ -642,9 +668,9 @@ export function Nav() {
                     className="flex-1 text-sm font-semibold text-center px-4 py-2.5 rounded-full border"
                     style={{
                       fontFamily: "'DM Sans',sans-serif",
-                      color: 'var(--fd-green)',
+                      color: C.green,
                       borderColor:
-                        'color-mix(in srgb, var(--fd-green) 40%, transparent)',
+                        `color-mix(in srgb, ${C.green}, transparent 60%)`,
                     }}
                   >
                     Sign In
@@ -655,7 +681,7 @@ export function Nav() {
                     className="flex-1 text-sm font-bold text-center px-4 py-2.5 rounded-full"
                     style={{
                       fontFamily: "'DM Sans',sans-serif",
-                      background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+                      background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`,
                       color: '#ffffff',
                     }}
                   >

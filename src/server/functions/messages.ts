@@ -51,13 +51,29 @@ export const getOrCreateThreadFn = createServerFn({ method: 'POST' }).handler(as
   const { userId } = await auth()
   if (!userId) throw new Error('Unauthorized')
   const { db } = await getFirebaseAdmin()
+  const buyerDoc = await db.collection('users').doc(userId).get()
+  const buyerName = buyerDoc.data()?.name || 'Buyer'
+  
   const threadsRef = db.collection('threads')
   const existing = await threadsRef.where('buyerId', '==', userId).where('farmerId', '==', farmerId).where('listingId', '==', listingId).get()
-  if (!existing.empty) return sanitizeData({ id: existing.docs[0].id, ...existing.docs[0].data() })
+  
+  if (!existing.empty) {
+    const doc = existing.docs[0]
+    const data = doc.data()
+    if (!data.participants || !data.buyerName) {
+      await doc.ref.update({ 
+        participants: [userId, farmerId],
+        buyerName: buyerName
+      })
+    }
+    return sanitizeData({ id: doc.id, ...data, participants: [userId, farmerId], buyerName })
+  }
   const thread = {
     buyerId: userId,
     farmerId,
+    participants: [userId, farmerId],
     listingId,
+    buyerName,
     farmerName,
     productName,
     productEmoji,
@@ -69,4 +85,16 @@ export const getOrCreateThreadFn = createServerFn({ method: 'POST' }).handler(as
   const docRef = await threadsRef.add(thread)
   await docRef.collection('messages').add({ content: thread.lastMessage, senderId: userId, createdAt: new Date() })
   return sanitizeData({ id: docRef.id, ...thread })
+})
+
+export const markThreadAsReadFn = createServerFn({ method: 'POST' }).handler(async (ctx: any) => {
+  const { threadId } = ctx.data as { threadId: string }
+  const { userId } = await auth()
+  if (!userId) throw new Error('Unauthorized')
+  const { db } = await getFirebaseAdmin()
+  const threadRef = db.collection('threads').doc(threadId)
+  await threadRef.update({
+    [`unreadCount.${userId}`]: 0
+  })
+  return { success: true }
 })

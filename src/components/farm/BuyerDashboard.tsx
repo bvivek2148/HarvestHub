@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useAuth } from '@/hooks/use-auth'
-import { useNavigate, Link } from '@tanstack/react-router'
+import { useNavigate, Link, useSearch } from '@tanstack/react-router'
 import {
   BarChart3,
   Package,
@@ -14,6 +14,7 @@ import {
   Menu,
   X,
   MessageSquare,
+  ShoppingCart,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -27,6 +28,7 @@ import { BuyerExploreTab } from './buyer/BuyerExploreTab'
 import { BuyerNotificationsPanel } from './buyer/BuyerNotificationsPanel'
 import { BuyerSettingsModal } from './buyer/BuyerSettingsModal'
 import { BuyerChatTab } from './buyer/BuyerChatTab'
+import { BuyerCartTab } from './buyer/BuyerCartTab'
 import { useQuery } from '@tanstack/react-query'
 import { getBuyerOrdersFn } from '@/server/functions/orders'
 import { getWishlistFn } from '@/server/functions/listings'
@@ -35,7 +37,9 @@ import { useNotifications } from '@/hooks/use-notifications'
 import { useChatThreads } from '@/hooks/use-firestore-chat'
 import { ChatPanel } from './common/ChatPanel'
 
-type TabId = 'overview' | 'orders' | 'saved' | 'explore' | 'chat'
+import { useCart } from '@/context/CartContext'
+
+type TabId = 'overview' | 'orders' | 'saved' | 'explore' | 'chat' | 'cart'
 
 const NAV_ITEMS: Array<{ id: TabId; icon: React.ReactNode; label: string }> = [
   {
@@ -47,12 +51,15 @@ const NAV_ITEMS: Array<{ id: TabId; icon: React.ReactNode; label: string }> = [
   { id: 'saved', icon: <Heart className="w-4 h-4" />, label: 'Wishlist' },
   { id: 'explore', icon: <Search className="w-4 h-4" />, label: 'Explore' },
   { id: 'chat', icon: <MessageSquare className="w-4 h-4" />, label: 'Messages' },
+  { id: 'cart', icon: <ShoppingCart className="w-4 h-4" />, label: 'Cart' },
 ]
 
 export function BuyerDashboard() {
   const { currentUser, signOut } = useAuth()
   const navigate = useNavigate()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications()
+  const { itemCount } = useCart()
+  const search = useSearch({ from: '/_protected/buyer' })
 
   const [activeTab, setActiveTab] = useState<TabId>('explore')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -79,12 +86,21 @@ export function BuyerDashboard() {
     if ((profile as any)?.name) setLocalDisplayName((profile as any).name)
   }, [profile])
 
+  useEffect(() => {
+    if (search.tab) {
+      setActiveTab(search.tab as TabId)
+    }
+    if (search.threadId) {
+      setActiveThreadId(search.threadId)
+    }
+  }, [search])
+
   const { threads } = useChatThreads()
   const activeThread = threads.find(t => t.id === activeThreadId)
   const unreadMsgs = threads.reduce((acc, t) => acc + (t.unreadCount?.[currentUser?.id || ''] || 0), 0)
 
   const displayName = localDisplayName || currentUser?.name || currentUser?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'Buyer'
-  const initials = displayName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
+  const initials = String(displayName || 'Buyer').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 
   const handleSignOut = async () => {
     await signOut()
@@ -108,8 +124,10 @@ export function BuyerDashboard() {
     <>
       <Link
         to="/"
-        className="h-16 flex items-center gap-2.5 px-5 hover:bg-white/[0.03] transition-colors group shrink-0"
-        style={{ borderBottom: `1px solid ${C.border}` }}
+        className="h-16 flex items-center gap-2.5 px-5 transition-colors group shrink-0"
+        style={{ borderBottom: `1px solid ${C.border}`, background: 'transparent' }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         onClick={() => setSidebarOpen(false)}
       >
         <div className="relative w-8 h-8">
@@ -121,7 +139,7 @@ export function BuyerDashboard() {
         </div>
         <span
           className="text-base font-bold"
-          style={{ color: '#f5f0e8', fontFamily: "'Syne', sans-serif" }}
+          style={{ color: C.text, fontFamily: "'Syne', sans-serif" }}
         >
           Harvest<span style={{ color: C.gold }}>Hub</span>
         </span>
@@ -137,9 +155,9 @@ export function BuyerDashboard() {
             className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold shrink-0"
             style={{
               background:
-                'linear-gradient(135deg, rgba(74,222,128,0.3), rgba(74,222,128,0.1))',
+                `linear-gradient(135deg, color-mix(in srgb, ${C.green}, transparent 75%), color-mix(in srgb, ${C.green}, transparent 90%))`,
               color: C.green,
-              border: '1px solid rgba(74,222,128,0.35)',
+              border: `1px solid color-mix(in srgb, ${C.green}, transparent 75%)`,
               fontFamily: "'Syne', sans-serif",
             }}
           >
@@ -148,7 +166,7 @@ export function BuyerDashboard() {
           <div className="flex-1 min-w-0">
             <div
               className="text-xs font-bold truncate"
-              style={{ color: '#f5f0e8' }}
+              style={{ color: C.text }}
             >
               {displayName}
             </div>
@@ -167,11 +185,11 @@ export function BuyerDashboard() {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm"
             style={{
               background:
-                activeTab === item.id ? 'rgba(74,222,128,0.1)' : 'transparent',
+                activeTab === item.id ? C.hover : 'transparent',
               color: activeTab === item.id ? C.green : C.muted,
               border:
                 activeTab === item.id
-                  ? '1px solid rgba(74,222,128,0.22)'
+                  ? `1px solid ${C.border2}`
                   : '1px solid transparent',
               fontWeight: activeTab === item.id ? 600 : 400,
             }}
@@ -184,6 +202,14 @@ export function BuyerDashboard() {
                 style={{ background: C.green, color: '#051005' }}
               >
                 {unreadMsgs}
+              </span>
+            )}
+            {item.id === 'cart' && itemCount > 0 && (
+              <span 
+                className="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                style={{ background: C.gold, color: '#051005' }}
+              >
+                {itemCount}
               </span>
             )}
           </button>
@@ -199,15 +225,19 @@ export function BuyerDashboard() {
             setShowSettings(true)
             setSidebarOpen(false)
           }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors hover:bg-white/[0.04]"
-          style={{ color: C.muted }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+          style={{ color: C.muted, background: 'transparent' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = C.hover)}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <Settings className="w-4 h-4" /> Settings
         </button>
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors hover:bg-red-950/30"
-          style={{ color: '#f87171' }}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors"
+          style={{ color: C.red, background: 'transparent' }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
         >
           <LogOut className="w-4 h-4" /> Sign Out
         </button>
@@ -295,7 +325,7 @@ export function BuyerDashboard() {
               <div>
                 <h1
                   className="text-base font-bold"
-                  style={{ color: '#f5f0e8', fontFamily: "'Syne', sans-serif" }}
+                  style={{ color: C.text, fontFamily: "'Syne', sans-serif" }}
                 >
                   {NAV_ITEMS.find((n) => n.id === activeTab)?.label ??
                     'Dashboard'}
@@ -310,8 +340,10 @@ export function BuyerDashboard() {
               {/* Notifications bell */}
               <button
                 onClick={() => setShowNotifications((v) => !v)}
-                className="relative p-2 rounded-xl transition-colors hover:bg-white/[0.05]"
-                style={{ color: C.muted }}
+                className="relative p-2 rounded-xl transition-colors"
+                style={{ color: C.muted, background: showNotifications ? C.hover : 'transparent' }}
+                onMouseEnter={(e) => !showNotifications && (e.currentTarget.style.background = C.hover)}
+                onMouseLeave={(e) => !showNotifications && (e.currentTarget.style.background = 'transparent')}
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
@@ -327,13 +359,13 @@ export function BuyerDashboard() {
               <button
                 onClick={() => setShowSettings(true)}
                 className="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold transition-all hover:scale-105"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(74,222,128,0.28), rgba(74,222,128,0.08))',
-                  color: C.green,
-                  border: '1px solid rgba(74,222,128,0.35)',
-                  fontFamily: "'Syne', sans-serif",
-                }}
+                  style={{
+                    background:
+                      `linear-gradient(135deg, color-mix(in srgb, ${C.green}, transparent 75%), color-mix(in srgb, ${C.green}, transparent 90%))`,
+                    color: C.green,
+                    border: `1px solid color-mix(in srgb, ${C.green}, transparent 65%)`,
+                    fontFamily: "'Syne', sans-serif",
+                  }}
               >
                 {initials}
               </button>
@@ -354,7 +386,7 @@ export function BuyerDashboard() {
                   color: activeTab === item.id ? C.green : C.muted,
                   background:
                     activeTab === item.id
-                      ? 'rgba(74,222,128,0.08)'
+                      ? C.hover
                       : 'transparent',
                 }}
               >
@@ -366,6 +398,14 @@ export function BuyerDashboard() {
                     style={{ background: C.green, color: '#051005' }}
                   >
                     {unreadMsgs}
+                  </span>
+                )}
+                {item.id === 'cart' && itemCount > 0 && (
+                  <span 
+                    className="absolute top-1 right-2 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                    style={{ background: C.gold, color: '#051005' }}
+                  >
+                    {itemCount}
                   </span>
                 )}
               </button>
@@ -413,7 +453,7 @@ export function BuyerDashboard() {
                   <BuyerSavedTab />
                 </motion.div>
               )}
-              {activeTab === 'explore' && (
+               {activeTab === 'explore' && (
                 <motion.div
                   key="explore"
                   initial={{ opacity: 0, y: 12 }}
@@ -421,10 +461,13 @@ export function BuyerDashboard() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <BuyerExploreTab onChat={setActiveThreadId} />
+                  <BuyerExploreTab onChat={(id) => {
+                    setActiveThreadId(id)
+                    setActiveTab('chat')
+                  }} />
                 </motion.div>
               )}
-              {activeTab === 'chat' && (
+               {activeTab === 'chat' && (
                 <motion.div
                   key="chat"
                   initial={{ opacity: 0, y: 12 }}
@@ -432,7 +475,18 @@ export function BuyerDashboard() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <BuyerChatTab />
+                  <BuyerChatTab activeThreadId={activeThreadId} />
+                </motion.div>
+              )}
+              {activeTab === 'cart' && (
+                <motion.div
+                  key="cart"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <BuyerCartTab />
                 </motion.div>
               )}
             </AnimatePresence>

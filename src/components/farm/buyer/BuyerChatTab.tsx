@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronRight, Loader2 } from 'lucide-react'
 import { C } from './BuyerTypes'
@@ -6,10 +6,17 @@ import { useChatThreads, type ChatThread } from '@/hooks/use-firestore-chat'
 import { ChatPanel } from '../common/ChatPanel'
 import { useAuth } from '@/hooks/use-auth'
 
-export function BuyerChatTab() {
+export function BuyerChatTab({ activeThreadId }: { activeThreadId?: string | null }) {
   const { currentUser } = useAuth()
   const { threads, loading } = useChatThreads()
   const [activeChat, setActiveChat] = useState<ChatThread | null>(null)
+
+  useEffect(() => {
+    if (activeThreadId && threads.length > 0) {
+      const thread = threads.find(t => t.id === activeThreadId)
+      if (thread) setActiveChat(thread)
+    }
+  }, [activeThreadId, threads])
 
   if (loading) {
       return (

@@ -25,9 +25,9 @@ import {
 const INPUT_CLS =
   'w-full px-4 py-2.5 rounded-xl text-sm focus:outline-none transition-all'
 const INPUT_STYLE = {
-  background: 'rgba(15,31,15,0.8)',
-  border: '1px solid rgba(55,95,55,0.4)',
-  color: '#eef5ee',
+  background: 'var(--fd-surface-2)',
+  border: '1px solid var(--fd-border)',
+  color: 'var(--fd-text)',
 }
 const LABEL_CLS = 'block text-xs font-semibold uppercase tracking-wider mb-1.5'
 const EMOJIS = [
@@ -113,7 +113,7 @@ function ListingModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0"
-      style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }}
+      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}
       onClick={onClose}
     >
       <motion.div
@@ -122,8 +122,8 @@ function ListingModal({
         exit={{ scale: 0.93, opacity: 0, y: 20 }}
         className="rounded-2xl w-full max-w-lg overflow-hidden"
         style={{
-          background: '#080f08',
-          border: '1px solid rgba(74,222,128,0.2)',
+          background: C.surface,
+          border: `1px solid ${C.border}`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -178,8 +178,8 @@ function ListingModal({
                     onClick={() => setForm((f) => ({ ...f, emoji: e }))}
                     className="w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all"
                     style={{
-                      background: form.emoji === e ? 'rgba(74,222,128,0.1)' : 'rgba(15,31,15,0.6)',
-                      border: form.emoji === e ? '1px solid rgba(74,222,128,0.4)' : '1px solid rgba(55,95,55,0.2)',
+                      background: form.emoji === e ? `color-mix(in srgb, ${C.green}, transparent 90%)` : `color-mix(in srgb, ${C.surface}, transparent 40%)`,
+                      border: form.emoji === e ? `1px solid color-mix(in srgb, ${C.green}, transparent 60%)` : `1px solid ${C.border}`,
                     }}
                   >
                     {e}
@@ -436,8 +436,8 @@ function DeleteModal({
         exit={{ scale: 0.9 }}
         className="rounded-2xl p-7 max-w-xs w-full text-center"
         style={{
-          background: '#080f08',
-          border: '1px solid rgba(248,113,113,0.25)',
+          background: C.surface,
+          border: `1px solid color-mix(in srgb, ${C.red}, transparent 75%)`,
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -530,8 +530,8 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
             }}
             className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold text-[#051005] transition-all hover:scale-105"
             style={{
-              background: 'linear-gradient(135deg,#4ade80,#16a34a)',
-              boxShadow: '0 4px 16px rgba(74,222,128,0.2)',
+              background: `linear-gradient(135deg, ${C.green}, ${C.greenDark})`,
+              boxShadow: `0 4px 16px color-mix(in srgb, ${C.green}, transparent 80%)`,
             }}
           >
             <Plus className="w-4 h-4" /> Add Listing
@@ -551,10 +551,10 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
                   className="px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
                   style={{
                     background: isActive
-                      ? (stConfig?.color ?? C.green) + '18'
+                      ? `color-mix(in srgb, ${stConfig?.color ?? C.green}, transparent 90%)`
                       : C.surface2,
                     color: isActive ? (stConfig?.color ?? C.green) : C.muted,
-                    border: `1px solid ${isActive ? (stConfig?.color ?? C.green) + '44' : C.border}`,
+                    border: `1px solid ${isActive ? `color-mix(in srgb, ${stConfig?.color ?? C.green}, transparent 70%)` : C.border}`,
                   }}
                 >
                   {s === 'all'
@@ -637,7 +637,7 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shrink-0"
                     style={{
-                      background: 'rgba(255,255,255,0.04)',
+                      background: C.hover,
                       border: `1px solid ${C.border}`,
                     }}
                   >
@@ -722,7 +722,7 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
                         }}
                         className="p-1.5 rounded-lg transition-all hover:scale-110"
                         style={{
-                          background: 'rgba(96,165,250,0.1)',
+                          background: `color-mix(in srgb, ${C.blue}, transparent 90%)`,
                           color: C.blue,
                         }}
                         title="Edit"
@@ -754,7 +754,7 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
                         onClick={() => setDeleteId(item.id)}
                         className="p-1.5 rounded-lg transition-all hover:scale-110"
                         style={{
-                          background: 'rgba(248,113,113,0.1)',
+                          background: `color-mix(in srgb, ${C.red}, transparent 90%)`,
                           color: C.red,
                         }}
                         title="Delete"
@@ -778,7 +778,7 @@ export function FarmerListingsTab({ listings, onSave, onDelete }: Props) {
                     </div>
                     <div
                       className="h-1.5 rounded-full overflow-hidden"
-                      style={{ background: 'rgba(255,255,255,0.06)' }}
+                      style={{ background: `color-mix(in srgb, ${C.text}, transparent 94%)` }}
                     >
                       <div
                         className="h-full rounded-full transition-all"

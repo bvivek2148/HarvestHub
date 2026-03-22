@@ -22,6 +22,29 @@ import {
   User,
 } from 'lucide-react'
 
+// ── Design Tokens ─────────────────────────────────────────────────────────────
+const C = {
+  bg: 'var(--fd-bg)',
+  surface: 'var(--fd-surface)',
+  surface2: 'var(--fd-surface-2)',
+  border: 'var(--fd-border)',
+  borderGlow: 'var(--fd-border-mid)',
+  text: 'var(--fd-text)',
+  textSub: 'var(--fd-text-2)',
+  textMuted: 'var(--fd-text-muted)',
+  green: 'var(--fd-green)',
+  greenDark: 'var(--fd-green-dark)',
+  greenGlow: 'var(--fd-green-bg)',
+  amber: 'var(--fd-gold)',
+  amberGlow: 'var(--fd-gold-bg)',
+  red: 'var(--fd-red)',
+  redGlow: 'var(--fd-red-bg)',
+  blue: 'var(--fd-blue)',
+  blueGlow: 'var(--fd-blue-bg)',
+  hover: 'var(--fd-hover-bg)',
+  active: 'var(--fd-active-bg)',
+}
+
 export interface ProduceItem {
   id: string
   name: string
@@ -53,15 +76,16 @@ interface ProduceCardProps {
   onToggleFavourite?: () => void
   onToggleCompare?: () => void
   onAddToCart?: (qty: number) => void
+  onChat?: () => void
 }
 
 type ChatMessage = { role: 'farmer' | 'buyer'; text: string }
 
 const freshnessLabel = (hours: number) => {
-  if (hours <= 24) return { label: 'Harvested Today', color: '#16a34a' }
-  if (hours <= 48) return { label: 'Yesterday', color: '#84cc16' }
-  if (hours <= 72) return { label: '2-3 Days', color: '#eab308' }
-  return { label: '3-5 Days', color: '#f97316' }
+  if (hours <= 24) return { label: 'Harvested Today', color: C.green }
+  if (hours <= 48) return { label: 'Yesterday', color: `color-mix(in srgb, ${C.green}, ${C.amber})` }
+  if (hours <= 72) return { label: '2-3 Days', color: C.amber }
+  return { label: '3-5 Days', color: `color-mix(in srgb, ${C.amber}, ${C.red})` }
 }
 
 function Toast({ message, visible }: { message: string; visible: boolean }) {
@@ -77,14 +101,14 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
           <div
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap shadow-xl"
             style={{
-              background: 'rgba(255,255,255,0.97)',
-              border: '1px solid rgba(217,119,6,0.4)',
-              color: '#d97706',
+              background: C.surface,
+              border: `1px solid ${C.borderGlow}`,
+              color: C.amber,
               fontFamily: "'DM Sans', sans-serif",
               backdropFilter: 'blur(12px)',
             }}
           >
-            <CheckCircle className="w-3 h-3" style={{ color: '#16a34a' }} />
+            <CheckCircle className="w-3 h-3" style={{ color: C.green }} />
             {message}
           </div>
         </motion.div>
@@ -132,7 +156,7 @@ function ChatPanel({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(20,83,45,0.5)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
@@ -153,7 +177,7 @@ function ChatPanel({
           {/* Farmer avatar — simple initial circle, no 3D */}
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0"
-            style={{ background: 'linear-gradient(135deg,#16a34a,#22c55e)' }}
+            style={{ background: `linear-gradient(135deg, ${C.green}, ${C.greenDark})` }}
           >
             {item.farmer.charAt(0)}
           </div>
@@ -170,13 +194,13 @@ function ChatPanel({
             <div className="flex items-center gap-1.5">
               <span
                 className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: '#16a34a' }}
+                style={{ background: C.green }}
               />
               <span
                 className="text-[10px]"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  color: '#16a34a',
+                  color: C.green,
                 }}
               >
                 Online · {item.farm}
@@ -216,7 +240,7 @@ function ChatPanel({
             </div>
             <div
               className="text-xs"
-              style={{ fontFamily: "'DM Sans', sans-serif", color: '#d97706' }}
+              style={{ fontFamily: "'DM Sans', sans-serif", color: C.amber }}
             >
               ₹{item.price.toFixed(2)} / {item.unit}
             </div>
@@ -240,7 +264,7 @@ function ChatPanel({
                   fontFamily: "'DM Sans', sans-serif",
                   background:
                     msg.role === 'buyer'
-                      ? 'linear-gradient(135deg,#16a34a,#22c55e)'
+                      ? `linear-gradient(135deg, ${C.green}, ${C.greenDark})`
                       : 'var(--fd-section-bg)',
                   color: msg.role === 'buyer' ? '#ffffff' : 'var(--fd-text-2)',
                   border:
@@ -277,7 +301,7 @@ function ChatPanel({
             onClick={send}
             disabled={!input.trim()}
             className="w-9 h-9 rounded-xl flex items-center justify-center disabled:opacity-40 transition-colors"
-            style={{ background: '#16a34a', color: '#ffffff' }}
+            style={{ background: C.green, color: '#ffffff' }}
           >
             <Send className="w-3.5 h-3.5" />
           </button>
@@ -304,7 +328,7 @@ function CartModal({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      style={{ background: 'rgba(20,83,45,0.5)', backdropFilter: 'blur(6px)' }}
+      style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <motion.div
@@ -314,7 +338,7 @@ function CartModal({
         className="w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: 'var(--fd-modal-bg)',
-          border: '1px solid rgba(217,119,6,0.3)',
+          border: `1px solid color-mix(in srgb, ${C.amber}, transparent 70%)`,
         }}
       >
         <div className="relative h-28 overflow-hidden">
@@ -327,7 +351,7 @@ function CartModal({
             className="absolute inset-0"
             style={{
               background:
-                'linear-gradient(to top, rgba(20,83,45,0.9) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
+                'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 60%, transparent 100%)',
             }}
           />
           <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
@@ -349,7 +373,7 @@ function CartModal({
               className="text-base font-bold"
               style={{
                 fontFamily: "'Playfair Display', serif",
-                color: '#fbbf24',
+                color: C.amber,
               }}
             >
               ₹{item.price.toFixed(2)}
@@ -444,7 +468,7 @@ function CartModal({
               <span
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  color: '#d97706',
+                  color: C.amber,
                 }}
               >
                 ₹{(item.price * qty * 0.05).toFixed(2)}
@@ -468,7 +492,7 @@ function CartModal({
                 className="font-bold"
                 style={{
                   fontFamily: "'Playfair Display', serif",
-                  color: '#16a34a',
+                  color: C.green,
                 }}
               >
                 ₹{(item.price * qty * 1.05).toFixed(2)}
@@ -493,7 +517,7 @@ function CartModal({
               onClick={() => onConfirm(qty)}
               className="flex-1 py-2.5 rounded-xl text-sm font-bold hover:shadow-lg transition-all"
               style={{
-                background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+                background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`,
                 color: '#ffffff',
                 fontFamily: "'DM Sans', sans-serif",
               }}
@@ -573,7 +597,7 @@ function CompareModal({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style={{
-        background: 'rgba(20,83,45,0.55)',
+        background: 'rgba(0,0,0,0.7)',
         backdropFilter: 'blur(8px)',
       }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
@@ -585,7 +609,7 @@ function CompareModal({
         className="w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl"
         style={{
           background: 'var(--fd-modal-bg)',
-          border: '1px solid rgba(59,130,246,0.3)',
+          border: `1px solid color-mix(in srgb, ${C.blue}, transparent 70%)`,
         }}
       >
         <div
@@ -595,7 +619,7 @@ function CompareModal({
           <div className="text-4xl mb-4">⚖️</div>
           <h3 className="text-lg font-bold mb-2" style={{ fontFamily: "'Playfair Display', serif", color: 'var(--fd-text)' }}>Comparison Coming Soon</h3>
           <p className="text-sm px-4" style={{ fontFamily: "'DM Sans', sans-serif", color: 'var(--fd-text-muted)' }}>We're building our database of similar products. Soon you'll be able to compare prices and freshness across all local farms!</p>
-          <button onClick={onClose} className="mt-6 px-6 py-2 rounded-xl text-sm font-bold" style={{ background: 'linear-gradient(135deg,#d97706,#f59e0b)', color: '#ffffff' }}>Close</button>
+          <button onClick={onClose} className="mt-6 px-6 py-2 rounded-xl text-sm font-bold" style={{ background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`, color: '#ffffff' }}>Close</button>
         </div>
 
         <div
@@ -617,7 +641,7 @@ function CompareModal({
               className="p-3 text-center"
               style={{
                 background:
-                  idx === 0 ? 'rgba(217,119,6,0.06)' : 'rgba(59,130,246,0.04)',
+                  idx === 0 ? `color-mix(in srgb, ${C.amber}, transparent 94%)` : `color-mix(in srgb, ${C.blue}, transparent 96%)`,
               }}
             >
               {p ? (
@@ -674,9 +698,9 @@ function CompareModal({
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
                   background:
-                    row.winner === 'a' ? 'rgba(217,119,6,0.08)' : 'transparent',
+                    row.winner === 'a' ? `color-mix(in srgb, ${C.amber}, transparent 92%)` : 'transparent',
                   color:
-                    row.winner === 'a' ? '#d97706' : 'var(--fd-text-muted)',
+                    row.winner === 'a' ? C.amber : 'var(--fd-text-muted)',
                 }}
               >
                 {row.a}
@@ -695,10 +719,10 @@ function CompareModal({
                   fontFamily: "'DM Sans', sans-serif",
                   background:
                     row.winner === 'b'
-                      ? 'rgba(59,130,246,0.08)'
+                      ? `color-mix(in srgb, ${C.blue}, transparent 92%)`
                       : 'transparent',
                   color:
-                    row.winner === 'b' ? '#3b82f6' : 'var(--fd-text-muted)',
+                    row.winner === 'b' ? C.blue : 'var(--fd-text-muted)',
                 }}
               >
                 {row.b}
@@ -720,7 +744,7 @@ function CompareModal({
             onClick={onClose}
             className="w-full py-2.5 rounded-xl text-sm font-bold"
             style={{
-              background: 'linear-gradient(135deg,#d97706,#f59e0b)',
+              background: `linear-gradient(135deg, ${C.amber}, ${C.amberGlow})`,
               color: '#ffffff',
               fontFamily: "'DM Sans', sans-serif",
             }}
@@ -742,6 +766,7 @@ export function ProduceCard({
   onToggleFavourite,
   onToggleCompare,
   onAddToCart,
+  onChat,
 }: ProduceCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState(false)
@@ -1190,7 +1215,7 @@ export function ProduceCard({
                 )}
               </motion.button>
               <motion.button
-                onClick={() => setShowChat(true)}
+                onClick={() => onChat ? onChat() : setShowChat(true)}
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200"
                 style={{
